@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PyCamp — Интерактивный курс Python</title>
+<style>
+  :root {
+    --bg-primary: #0a0a23;
+    --bg-secondary: #1b1b32;
+    --bg-tertiary: #2a2a40;
+    --bg-editor: #1e1e2e;
+    --text-primary: #f5f6f7;
+    --text-secondary: #d0d0d5;
+    --text-muted: #858591;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --success: #22c55e;
+    --success-bg: #052e16;
+    --error: #ef4444;
+    --error-bg: #2d0a0a;
+    --warning: #f59e0b;
+    --warning-bg: #2d2006;
+    --border: #3b3b4f;
+    --line-num: #555570;
+    --scrollbar: #3b3b4f;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 8px;
+    --transition: 0.2s ease;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+  ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ─── HEADER ─── */
+  .header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .header-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .header-stats .streak {
+    color: var(--warning);
+    font-weight: 600;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-container {
+    background: var(--bg-secondary);
+    padding: 0 24px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #8b5cf6);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* ─── LOADING SCREEN ─── */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+  }
+
+  .loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loading-spinner {
+    width: 60px; height: 60px;
+    border: 4px solid var(--bg-tertiary);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+  }
+
+  .loading-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+
+  /* ─── MAIN LAYOUT ─── */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: calc(100vh - 90px);
+  }
+
+  /* ─── LEFT PANEL (Instructions) ─── */
+  .panel-left {
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    max-height: calc(100vh - 90px);
+    position: sticky;
+    top: 90px;
+  }
+
+  .task-header {
+    padding: 24px 28px 0;
+  }
+
+  .task-number {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .task-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+
+  .task-description {
+    padding: 0 28px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .task-description p { margin-bottom: 12px; }
+
+  .task-description code {
+    background: var(--bg-tertiary);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    color: #c084fc;
+  }
+
+  .task-description pre {
+    background: var(--bg-editor);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin: 12px 0;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #e2e8f0;
+  }
+
+  .task-description ul, .task-description ol {
+    margin: 8px 0 12px 20px;
+  }
+
+  .task-description li { margin-bottom: 4px; }
+
+  .task-description .expected {
+    background: var(--success-bg);
+    border: 1px solid #166534;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .task-description .expected-label {
+    color: var(--success);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    font-family: var(--font-sans);
+  }
+
+  /* ─── RIGHT PANEL (Editor) ─── */
+  .panel-right {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    max-height: calc(100vh - 90px);
+    position: sticky;
+    top: 90px;
+  }
+
+  .editor-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .editor-toolbar .file-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    background: var(--bg-editor);
+    padding: 5px 14px;
+    border-radius: 6px 6px 0 0;
+    border: 1px solid var(--border);
+    border-bottom-color: var(--bg-editor);
+  }
+
+  .file-tab .dot { color: #f59e0b; }
+
+  .editor-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-reset {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .btn-reset:hover {
+    border-color: var(--error);
+    color: var(--error);
+  }
+
+  .editor-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+  }
+
+  .line-numbers {
+    background: var(--bg-editor);
+    padding: 16px 0;
+    text-align: right;
+    user-select: none;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: var(--line-num);
+    min-width: 44px;
+    padding-right: 12px;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .line-numbers div {
+    padding-right: 4px;
+  }
+
+  .code-editor {
+    flex: 1;
+    background: var(--bg-editor);
+    color: #e2e8f0;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.65;
+    tab-size: 4;
+    white-space: pre;
+    overflow: auto;
+  }
+
+  .code-editor::placeholder {
+    color: var(--text-muted);
+  }
+
+  /* ─── BOTTOM SECTION ─── */
+  .bottom-section {
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    align-items: center;
+  }
+
+  .btn-run {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-run:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-run:active { transform: translateY(0); }
+  .btn-run:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-run .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: none;
+  }
+
+  .btn-run.loading .spinner { display: block; }
+  .btn-run.loading .btn-text { display: none; }
+
+  .nav-buttons {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .btn-nav {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .btn-nav:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ─── OUTPUT / RESULT ─── */
+  .output-panel {
+    background: var(--bg-primary);
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .output-panel.visible { display: block; }
+
+  .output-header {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+    position: sticky;
+    top: 0;
+  }
+
+  .output-content {
+    padding: 12px 16px;
+    font-family: var(--font-mono);
+    font-size: 0.83rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .output-content.success { color: var(--success); }
+  .output-content.error { color: var(--error); }
+  .output-content.info { color: var(--text-secondary); }
+
+  .result-banner {
+    padding: 14px 16px;
+    display: none;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .result-banner.visible { display: flex; }
+
+  .result-banner.success {
+    background: var(--success-bg);
+    border-top: 2px solid var(--success);
+    color: var(--success);
+  }
+
+  .result-banner.error {
+    background: var(--error-bg);
+    border-top: 2px solid var(--error);
+    color: var(--error);
+  }
+
+  .result-banner.warning {
+    background: var(--warning-bg);
+    border-top: 2px solid var(--warning);
+    color: var(--warning);
+  }
+
+  .result-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+  .result-text { flex: 1; }
+  .result-text strong { display: block; margin-bottom: 2px; }
+  .result-text .hint {
+    color: var(--text-secondary);
+    font-size: 0.83rem;
+    margin-top: 6px;
+  }
+
+  /* ─── TASK LIST SIDEBAR (mobile toggle) ─── */
+  .task-list-toggle {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px; height: 50px;
+    background: var(--accent);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    z-index: 200;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+  }
+
+  .task-list-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 150;
+  }
+
+  .task-list-panel {
+    position: fixed;
+    top: 0;
+    left: -320px;
+    width: 300px;
+    height: 100%;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    z-index: 160;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+
+  .task-list-panel.open { left: 0; }
+
+  .task-list-panel h3 {
+    padding: 0 20px 16px;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .task-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .task-list-item:hover { background: var(--bg-tertiary); }
+  .task-list-item.active { background: var(--bg-tertiary); color: var(--accent); font-weight: 600; }
+  .task-list-item.completed .task-check { color: var(--success); }
+
+  .task-check {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+  }
+
+  .task-list-item.completed .task-check {
+    border-color: var(--success);
+    background: var(--success);
+    color: white;
+  }
+
+  /* ─── COMPLETION MODAL ─── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.visible { display: flex; }
+
+  .modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    max-width: 440px;
+    width: 90%;
+    animation: modalIn 0.3s ease;
+  }
+
+  @keyframes modalIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal .trophy { font-size: 4rem; margin-bottom: 16px; }
+  .modal h2 { font-size: 1.5rem; margin-bottom: 8px; }
+  .modal p { color: var(--text-secondary); margin-bottom: 24px; }
+
+  .modal .btn-run {
+    margin: 0 auto;
+    padding: 12px 32px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .main-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .panel-left {
+      position: relative;
+      top: 0;
+      max-height: none;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-right {
+      position: relative;
+      top: 0;
+      max-height: none;
+      min-height: 60vh;
+    }
+
+    .task-list-toggle { display: flex; align-items: center; justify-content: center; }
+
+    .header-stats { display: none; }
+  }
+
+  @media (max-width: 500px) {
+    .header { padding: 10px 14px; }
+    .logo { font-size: 1.1rem; }
+    .task-header { padding: 16px 16px 0; }
+    .task-description { padding: 0 16px; }
+    .task-title { font-size: 1.2rem; }
+    .action-bar { flex-wrap: wrap; }
+    .nav-buttons { margin-left: 0; width: 100%; justify-content: space-between; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Загрузка Python-движка...</div>
+  <div class="loading-sub" id="loadingStatus">Инициализация Pyodide</div>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <a class="logo" href="#">
+    <div class="logo-icon">🐍</div>
+    Py<span>Camp</span>
+  </a>
+  <div class="header-stats">
+    <span>🏆 Решено: <strong id="solvedCount">0</strong> / <strong id="totalCount">15</strong></span>
+  </div>
+</header>
+
+<!-- Progress -->
+<div class="progress-container">
+  <div class="progress-info">
+    <span id="progressLabel">Задача 1 из 15</span>
+    <span id="progressPercent">0%</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main-layout">
+  <!-- Left: Instructions -->
+  <div class="panel-left" id="panelLeft">
+    <div class="task-header">
+      <div class="task-number" id="taskNumber">ЗАДАЧА 1 ИЗ 15</div>
+      <h1 class="task-title" id="taskTitle">Загрузка...</h1>
+    </div>
+    <div class="task-description" id="taskDescription"></div>
+  </div>
+
+  <!-- Right: Editor -->
+  <div class="panel-right">
+    <div class="editor-toolbar">
+      <div class="file-tab"><span class="dot">●</span> main.py</div>
+      <div class="editor-actions">
+        <button class="btn-reset" onclick="resetCode()" title="Сбросить код">↺ Сбросить</button>
+      </div>
+    </div>
+    <div class="editor-wrapper">
+      <div class="line-numbers" id="lineNumbers"><div>1</div></div>
+      <textarea class="code-editor" id="codeEditor" spellcheck="false" placeholder="# Напишите ваш код здесь..."></textarea>
+    </div>
+    <div class="bottom-section">
+      <div class="result-banner" id="resultBanner">
+        <span class="result-icon" id="resultIcon"></span>
+        <div class="result-text" id="resultText"></div>
+      </div>
+      <div class="output-panel" id="outputPanel">
+        <div class="output-header">Вывод консоли</div>
+        <div class="output-content" id="outputContent"></div>
+      </div>
+      <div class="action-bar">
+        <button class="btn-run" id="btnRun" onclick="runCode()">
+          <span class="spinner"></span>
+          <span class="btn-text">▶ Проверить</span>
+        </button>
+        <div class="nav-buttons">
+          <button class="btn-nav" id="btnPrev" onclick="prevTask()">← Назад</button>
+          <button class="btn-nav" id="btnNext" onclick="nextTask()">Далее →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile task list -->
+<button class="task-list-toggle" id="taskListToggle" onclick="toggleTaskList()">☰</button>
+<div class="task-list-overlay" id="taskListOverlay" onclick="toggleTaskList()"></div>
+<div class="task-list-panel" id="taskListPanel">
+  <h3>📋 Все задачи</h3>
+  <div id="taskListItems"></div>
+</div>
+
+<!-- Completion Modal -->
+<div class="modal-overlay" id="completionModal">
+  <div class="modal">
+    <div class="trophy">🎉</div>
+    <h2>Курс завершён!</h2>
+    <p>Вы решили все 15 задач и освоили основы Python. Отличная работа!</p>
+    <button class="btn-run" onclick="document.getElementById('completionModal').classList.remove('visible')">Отлично!</button>
+  </div>
+</div>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  TASK DEFINITIONS
+// ═══════════════════════════════════════════════════════════
+const TASKS = [
+  {
+    title: "Привет, мир!",
+    description: `
+      <p>Добро пожаловать в курс по основам Python! 🐍</p>
+      <p>Любое обучение программированию начинается с классической задачи — вывести текст на экран. В Python для этого используется функция <code>print()</code>.</p>
+      <pre>print("Текст для вывода")</pre>
+      <p><strong>Задание:</strong> Напишите программу, которая выводит на экран фразу:</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        Привет, мир!
+      </div>
+    `,
+    starter: `# Напишите программу, которая выводит "Привет, мир!"\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "Привет, мир!") return { pass: true };
+      if (out === "") return { pass: false, hint: "Используйте функцию print() для вывода текста." };
+      if (out.toLowerCase().includes("привет") && out.toLowerCase().includes("мир"))
+        return { pass: false, hint: "Почти! Проверьте точное написание, включая запятую и восклицательный знак: Привет, мир!" };
+      return { pass: false, hint: `Вывод должен быть точно "Привет, мир!", а получено "${out}".` };
+    }
+  },
+  {
+    title: "Переменные и присваивание",
+    description: `
+      <p>Переменная — это именованная область памяти для хранения данных. В Python переменные создаются в момент присваивания значения:</p>
+      <pre>name = "Алиса"
+age = 25
+print(name)
+print(age)</pre>
+      <p><strong>Задание:</strong> Создайте переменную <code>city</code> со значением <code>"Москва"</code> и выведите её на экран.</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        Москва
+      </div>
+    `,
+    starter: `# Создайте переменную city и выведите её\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (!code.includes("city")) return { pass: false, hint: "Создайте переменную с именем city." };
+      if (out === "Москва") return { pass: true };
+      if (out === "") return { pass: false, hint: "Не забудьте вызвать print(city)." };
+      return { pass: false, hint: `Значение переменной city должно быть "Москва", а выводится "${out}".` };
+    }
+  },
+  {
+    title: "Типы данных",
+    description: `
+      <p>В Python есть несколько основных типов данных:</p>
+      <ul>
+        <li><code>int</code> — целые числа: <code>42</code></li>
+        <li><code>float</code> — дробные числа: <code>3.14</code></li>
+        <li><code>str</code> — строки: <code>"текст"</code></li>
+        <li><code>bool</code> — логический тип: <code>True</code>, <code>False</code></li>
+      </ul>
+      <p>Функция <code>type()</code> позволяет узнать тип значения.</p>
+      <pre>x = 10
+print(type(x))  # &lt;class 'int'&gt;</pre>
+      <p><strong>Задание:</strong> Создайте три переменные: <code>a = 10</code>, <code>b = 3.14</code>, <code>c = "Python"</code>. Выведите тип каждой переменной на отдельной строке.</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        &lt;class 'int'&gt;
+        &lt;class 'float'&gt;
+        &lt;class 'str'&gt;
+      </div>
+    `,
+    starter: `# Создайте переменные a, b, c и выведите их типы\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      const expected = "<class 'int'>\n<class 'float'>\n<class 'str'>";
+      if (out === expected) return { pass: true };
+      if (!code.includes("type(")) return { pass: false, hint: "Используйте функцию type() для определения типа." };
+      if (out.includes("int") && out.includes("float") && out.includes("str"))
+        return { pass: false, hint: "Почти верно! Убедитесь, что выводите type() для каждой переменной в правильном порядке." };
+      return { pass: false, hint: "Создайте a=10, b=3.14, c=\"Python\" и выведите type() для каждой." };
+    }
+  },
+  {
+    title: "Строки и конкатенация",
+    description: `
+      <p>Строки можно объединять с помощью оператора <code>+</code> (конкатенация) и повторять с помощью <code>*</code>:</p>
+      <pre>first = "Привет"
+second = "Мир"
+print(first + ", " + second + "!")</pre>
+      <p>Также можно использовать f-строки (Python 3.6+):</p>
+      <pre>name = "Алиса"
+print(f"Привет, {name}!")</pre>
+      <p><strong>Задание:</strong> Создайте переменные <code>first_name = "Иван"</code> и <code>last_name = "Петров"</code>. Выведите полное имя в формате:</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        Иван Петров
+      </div>
+    `,
+    starter: `# Объедините имя и фамилию через пробел\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "Иван Петров") return { pass: true };
+      if (out === "ИванПетров") return { pass: false, hint: "Не забудьте добавить пробел между именем и фамилией." };
+      if (!code.includes("first_name") || !code.includes("last_name"))
+        return { pass: false, hint: "Используйте переменные first_name и last_name." };
+      return { pass: false, hint: `Ожидалось "Иван Петров", получено "${out}".` };
+    }
+  },
+  {
+    title: "Числа и арифметика",
+    description: `
+      <p>Python поддерживает все стандартные арифметические операции:</p>
+      <pre>print(10 + 3)   # Сложение: 13
+print(10 - 3)   # Вычитание: 7
+print(10 * 3)   # Умножение: 30
+print(10 / 3)   # Деление: 3.333...
+print(10 // 3)  # Целочисленное деление: 3
+print(10 % 3)   # Остаток: 1
+print(10 ** 3)  # Степень: 1000</pre>
+      <p><strong>Задание:</strong> Вычислите и выведите результат выражения: <code>(15 + 5) * 2 - 10</code></p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        30
+      </div>
+    `,
+    starter: `# Вычислите (15 + 5) * 2 - 10 и выведите результат\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "30") return { pass: true };
+      if (out === "40") return { pass: false, hint: "Проверьте порядок операций. Умножение выполняется после сложения в скобках." };
+      return { pass: false, hint: `Результат (15 + 5) * 2 - 10 = 30, а получено "${out}".` };
+    }
+  },
+  {
+    title: "Преобразование типов",
+    description: `
+      <p>Иногда нужно преобразовать один тип данных в другой:</p>
+      <pre>num_str = "42"
+num_int = int(num_str)    # строка → число
+pi_str = str(3.14)        # число → строка
+flag = bool(1)             # число → логическое</pre>
+      <p><strong>Задание:</strong> Даны переменные <code>a = "10"</code> и <code>b = "20"</code> (строки!). Преобразуйте их в числа, сложите и выведите результат.</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        30
+      </div>
+      <p>⚠️ Если просто сложить строки, получится <code>"1020"</code>, а не <code>30</code>.</p>
+    `,
+    starter: `a = "10"
+b = "20"
+# Преобразуйте a и b в числа, сложите и выведите результат\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "30") return { pass: true };
+      if (out === "1020") return { pass: false, hint: "Вы сложили строки! Используйте int() для преобразования в числа перед сложением." };
+      if (!code.includes("int(")) return { pass: false, hint: "Используйте функцию int() для преобразования строк в числа." };
+      return { pass: false, hint: `Ожидалось 30, получено "${out}".` };
+    }
+  },
+  {
+    title: "Условные операторы",
+    description: `
+      <p>Условия позволяют выполнять код в зависимости от ситуации:</p>
+      <pre>age = 18
+if age >= 18:
+    print("Совершеннолетний")
+elif age >= 14:
+    print("Подросток")
+else:
+    print("Ребёнок")</pre>
+      <p>Обратите внимание на <strong>двоеточие</strong> и <strong>отступы</strong> (4 пробела)!</p>
+      <p><strong>Задание:</strong> Переменная <code>score = 85</code>. Выведите:</p>
+      <ul>
+        <li><code>"Отлично"</code>, если score >= 90</li>
+        <li><code>"Хорошо"</code>, если score >= 70</li>
+        <li><code>"Удовлетворительно"</code> в остальных случаях</li>
+      </ul>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        Хорошо
+      </div>
+    `,
+    starter: `score = 85
+# Напишите условную конструкцию if/elif/else\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "Хорошо") return { pass: true };
+      if (!code.includes("if")) return { pass: false, hint: "Используйте конструкцию if/elif/else." };
+      if (out === "Отлично") return { pass: false, hint: "85 меньше 90, поэтому должно быть «Хорошо». Проверьте порядок условий." };
+      return { pass: false, hint: `При score=85 должно выводиться "Хорошо", получено "${out}".` };
+    }
+  },
+  {
+    title: "Цикл for",
+    description: `
+      <p>Цикл <code>for</code> позволяет перебирать элементы последовательности:</p>
+      <pre>for i in range(5):
+    print(i)  # 0, 1, 2, 3, 4</pre>
+      <p>Функция <code>range(start, stop, step)</code> генерирует числа от <code>start</code> до <code>stop-1</code>.</p>
+      <p><strong>Задание:</strong> С помощью цикла <code>for</code> выведите числа от 1 до 5, каждое на отдельной строке.</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        1
+        2
+        3
+        4
+        5
+      </div>
+    `,
+    starter: `# Выведите числа от 1 до 5 с помощью цикла for\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "1\n2\n3\n4\n5") return { pass: true };
+      if (!code.includes("for")) return { pass: false, hint: "Используйте цикл for." };
+      if (out === "0\n1\n2\n3\n4") return { pass: false, hint: "range(5) начинает с 0. Используйте range(1, 6) для чисел от 1 до 5." };
+      return { pass: false, hint: `Ожидались числа 1-5 на отдельных строках.` };
+    }
+  },
+  {
+    title: "Цикл while",
+    description: `
+      <p>Цикл <code>while</code> выполняется, пока условие истинно:</p>
+      <pre>count = 0
+while count < 3:
+    print(count)
+    count += 1</pre>
+      <p>⚠️ Не забывайте изменять переменную условия, иначе цикл будет бесконечным!</p>
+      <p><strong>Задание:</strong> Используя цикл <code>while</code>, выведите все чётные числа от 2 до 10 включительно, каждое на отдельной строке.</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        2
+        4
+        6
+        8
+        10
+      </div>
+    `,
+    starter: `# Выведите чётные числа от 2 до 10 с помощью while\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "2\n4\n6\n8\n10") return { pass: true };
+      if (!code.includes("while")) return { pass: false, hint: "Используйте цикл while." };
+      if (out === "2\n4\n6\n8") return { pass: false, hint: "Не забудьте включить 10. Условие должно быть <= 10." };
+      return { pass: false, hint: "Ожидались чётные числа 2, 4, 6, 8, 10 на отдельных строках." };
+    }
+  },
+  {
+    title: "Списки",
+    description: `
+      <p>Список — это упорядоченная изменяемая коллекция элементов:</p>
+      <pre>fruits = ["яблоко", "банан", "вишня"]
+print(fruits[0])     # яблоко
+print(len(fruits))   # 3
+fruits.append("груша")
+print(fruits)</pre>
+      <p><strong>Задание:</strong> Создайте список <code>numbers = [3, 1, 4, 1, 5, 9]</code>. Отсортируйте его по возрастанию с помощью <code>.sort()</code> и выведите результат.</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        [1, 1, 3, 4, 5, 9]
+      </div>
+    `,
+    starter: `numbers = [3, 1, 4, 1, 5, 9]
+# Отсортируйте список и выведите его\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "[1, 1, 3, 4, 5, 9]") return { pass: true };
+      if (out === "[3, 1, 4, 1, 5, 9]") return { pass: false, hint: "Вы не отсортировали список. Вызовите numbers.sort() перед print." };
+      if (!code.includes(".sort()") && !code.includes("sorted("))
+        return { pass: false, hint: "Используйте метод .sort() или функцию sorted()." };
+      return { pass: false, hint: `Ожидалось [1, 1, 3, 4, 5, 9], получено "${out}".` };
+    }
+  },
+  {
+    title: "Словари",
+    description: `
+      <p>Словарь хранит данные в парах «ключ: значение»:</p>
+      <pre>person = {
+    "name": "Алиса",
+    "age": 25
+}
+print(person["name"])  # Алиса
+person["city"] = "Москва"  # добавить</pre>
+      <p><strong>Задание:</strong> Создайте словарь <code>student</code> с ключами <code>"name"</code> (значение <code>"Анна"</code>) и <code>"grade"</code> (значение <code>5</code>). Выведите строку в формате:</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        Анна: 5
+      </div>
+    `,
+    starter: `# Создайте словарь student и выведите "Анна: 5"\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "Анна: 5") return { pass: true };
+      if (!code.includes("student") || !code.includes("{"))
+        return { pass: false, hint: "Создайте словарь с именем student." };
+      if (out === "Анна 5") return { pass: false, hint: "Не забудьте двоеточие и пробел между именем и оценкой." };
+      return { pass: false, hint: `Ожидалось "Анна: 5", получено "${out}".` };
+    }
+  },
+  {
+    title: "Функции",
+    description: `
+      <p>Функции позволяют организовать код в переиспользуемые блоки:</p>
+      <pre>def greet(name):
+    print(f"Привет, {name}!")
+
+greet("Мир")  # Привет, Мир!</pre>
+      <p><strong>Задание:</strong> Напишите функцию <code>square(n)</code>, которая <strong>возвращает</strong> квадрат числа. Затем выведите результат вызова <code>square(7)</code>.</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        49
+      </div>
+    `,
+    starter: `# Напишите функцию square(n) и выведите square(7)\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "49") return { pass: true };
+      if (!code.includes("def square")) return { pass: false, hint: "Определите функцию с помощью def square(n):" };
+      if (!code.includes("return")) return { pass: false, hint: "Функция должна возвращать значение через return, а не просто печатать." };
+      if (out === "None") return { pass: false, hint: "Функция возвращает None. Убедитесь, что используете return n ** 2 или return n * n." };
+      return { pass: false, hint: `square(7) должно быть 49, получено "${out}".` };
+    }
+  },
+  {
+    title: "Функции с параметрами по умолчанию",
+    description: `
+      <p>Параметры функции могут иметь значения по умолчанию:</p>
+      <pre>def power(base, exp=2):
+    return base ** exp
+
+print(power(3))     # 9  (3²)
+print(power(2, 10)) # 1024 (2¹⁰)</pre>
+      <p><strong>Задание:</strong> Напишите функцию <code>greet(name, greeting="Привет")</code>, которая выводит строку <code>"{greeting}, {name}!"</code>. Вызовите её дважды:</p>
+      <ol>
+        <li><code>greet("Алиса")</code></li>
+        <li><code>greet("Боб", "Здравствуйте")</code></li>
+      </ol>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        Привет, Алиса!
+        Здравствуйте, Боб!
+      </div>
+    `,
+    starter: `# Напишите функцию greet с параметром по умолчанию\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      const expected = "Привет, Алиса!\nЗдравствуйте, Боб!";
+      if (out === expected) return { pass: true };
+      if (!code.includes("def greet")) return { pass: false, hint: "Определите функцию def greet(name, greeting=\"Привет\")." };
+      if (!code.includes("greeting=")) return { pass: false, hint: "Добавьте параметр greeting со значением по умолчанию \"Привет\"." };
+      return { pass: false, hint: `Ожидалось:\\n${expected}\\nПолучено:\\n${out}` };
+    }
+  },
+  {
+    title: "Генераторы списков",
+    description: `
+      <p>List comprehension — компактный способ создания списков:</p>
+      <pre>squares = [x**2 for x in range(5)]
+print(squares)  # [0, 1, 4, 9, 16]
+
+evens = [x for x in range(10) if x % 2 == 0]
+print(evens)  # [0, 2, 4, 6, 8]</pre>
+      <p><strong>Задание:</strong> С помощью генератора списка создайте список кубов чисел от 1 до 5 и выведите его.</p>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        [1, 8, 27, 64, 125]
+      </div>
+    `,
+    starter: `# Создайте список кубов чисел от 1 до 5\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      if (out === "[1, 8, 27, 64, 125]") return { pass: true };
+      if (!code.includes("for") || !code.includes("in"))
+        return { pass: false, hint: "Используйте генератор списка: [выражение for x in range(...)]." };
+      if (out === "[0, 1, 8, 27, 64]") return { pass: false, hint: "Диапазон должен начинаться с 1: range(1, 6)." };
+      return { pass: false, hint: `Ожидалось [1, 8, 27, 64, 125], получено "${out}".` };
+    }
+  },
+  {
+    title: "🏆 Финальный проект: Анализатор текста",
+    description: `
+      <p>Поздравляем, вы дошли до финальной задачи! 🎉</p>
+      <p>Теперь объединим всё изученное в одном проекте.</p>
+      <p><strong>Задание:</strong> Напишите функцию <code>analyze(text)</code>, которая принимает строку и выводит:</p>
+      <ol>
+        <li>Количество символов (включая пробелы)</li>
+        <li>Количество слов</li>
+        <li>Строку в верхнем регистре</li>
+      </ol>
+      <p>Каждый результат — на отдельной строке. Затем вызовите:</p>
+      <pre>analyze("Python это круто")</pre>
+      <div class="expected">
+        <div class="expected-label">Ожидаемый вывод</div>
+        16
+        3
+        PYTHON ЭТО КРУТО
+      </div>
+      <p>💡 Подсказки: <code>len()</code>, <code>.split()</code>, <code>.upper()</code></p>
+    `,
+    starter: `# Напишите функцию analyze(text) и вызовите её\n`,
+    check(stdout, code) {
+      const out = stdout.trim();
+      const expected = "16\n3\nPYTHON ЭТО КРУТО";
+      if (out === expected) return { pass: true };
+      if (!code.includes("def analyze")) return { pass: false, hint: "Определите функцию def analyze(text):" };
+      if (!code.includes("len(")) return { pass: false, hint: "Используйте len(text) для подсчёта символов." };
+      if (!code.includes(".split()")) return { pass: false, hint: "Используйте text.split() для разделения на слова." };
+      if (!code.includes(".upper()")) return { pass: false, hint: "Используйте text.upper() для верхнего регистра." };
+      const lines = out.split("\n");
+      if (lines[0] !== "16") return { pass: false, hint: `Количество символов в "Python это круто" = 16, у вас "${lines[0]}".` };
+      if (lines[1] !== "3") return { pass: false, hint: `Количество слов = 3, у вас "${lines[1]}".` };
+      return { pass: false, hint: `Ожидалось:\\n${expected}\\nПолучено:\\n${out}` };
+    }
+  }
+];
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let currentTask = 0;
+let completed = new Set();
+let pyodide = null;
+let isRunning = false;
+
+// Load progress from localStorage
+try {
+  const saved = JSON.parse(localStorage.getItem('pycamp_progress') || '{}');
+  if (saved.completed) completed = new Set(saved.completed);
+  if (typeof saved.currentTask === 'number') currentTask = saved.currentTask;
+} catch(e) {}
+
+function saveProgress() {
+  localStorage.setItem('pycamp_progress', JSON.stringify({
+    completed: [...completed],
+    currentTask
+  }));
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PYODIDE INIT
+// ═══════════════════════════════════════════════════════════
+async function initPyodide() {
+  const statusEl = document.getElementById('loadingStatus');
+  try {
+    statusEl.textContent = 'Загрузка Pyodide (~20 МБ)...';
+    pyodide = await loadPyodide();
+    statusEl.textContent = 'Готово!';
+    setTimeout(() => {
+      document.getElementById('loadingScreen').classList.add('hidden');
+    }, 400);
+  } catch(e) {
+    statusEl.textContent = 'Ошибка загрузки. Обновите страницу.';
+    console.error(e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UI RENDERING
+// ═══════════════════════════════════════════════════════════
+function renderTask() {
+  const task = TASKS[currentTask];
+  document.getElementById('taskNumber').textContent = `ЗАДАЧА ${currentTask + 1} ИЗ ${TASKS.length}`;
+  document.getElementById('taskTitle').textContent = task.title;
+  document.getElementById('taskDescription').innerHTML = task.description;
+  document.getElementById('codeEditor').value = task.starter;
+  updateLineNumbers();
+  hideResults();
+  updateProgress();
+  updateNavButtons();
+  renderTaskList();
+  saveProgress();
+}
+
+function updateProgress() {
+  const pct = Math.round((completed.size / TASKS.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPercent').textContent = pct + '%';
+  document.getElementById('progressLabel').textContent = `Задача ${currentTask + 1} из ${TASKS.length}`;
+  document.getElementById('solvedCount').textContent = completed.size;
+  document.getElementById('totalCount').textContent = TASKS.length;
+}
+
+function updateNavButtons() {
+  document.getElementById('btnPrev').disabled = currentTask === 0;
+  document.getElementById('btnNext').disabled = currentTask === TASKS.length - 1;
+}
+
+function renderTaskList() {
+  const container = document.getElementById('taskListItems');
+  container.innerHTML = TASKS.map((t, i) => `
+    <div class="task-list-item ${i === currentTask ? 'active' : ''} ${completed.has(i) ? 'completed' : ''}"
+         onclick="goToTask(${i})">
+      <div class="task-check">${completed.has(i) ? '✓' : ''}</div>
+      <span>${i + 1}. ${t.title}</span>
+    </div>
+  `).join('');
+}
+
+function hideResults() {
+  document.getElementById('resultBanner').className = 'result-banner';
+  document.getElementById('outputPanel').classList.remove('visible');
+}
+
+function showResult(type, icon, title, hint) {
+  const banner = document.getElementById('resultBanner');
+  banner.className = `result-banner visible ${type}`;
+  document.getElementById('resultIcon').textContent = icon;
+  document.getElementById('resultText').innerHTML = `<strong>${title}</strong>${hint ? `<div class="hint">${hint}</div>` : ''}`;
+}
+
+function showOutput(text, type) {
+  const panel = document.getElementById('outputPanel');
+  const content = document.getElementById('outputContent');
+  panel.classList.add('visible');
+  content.className = `output-content ${type}`;
+  content.textContent = text;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LINE NUMBERS
+// ═══════════════════════════════════════════════════════════
+function updateLineNumbers() {
+  const editor = document.getElementById('codeEditor');
+  const lines = editor.value.split('\n').length;
+  const container = document.getElementById('lineNumbers');
+  container.innerHTML = Array.from({length: lines}, (_, i) => `<div>${i + 1}</div>`).join('');
+}
+
+document.getElementById('codeEditor').addEventListener('input', updateLineNumbers);
+document.getElementById('codeEditor').addEventListener('scroll', function() {
+  document.getElementById('lineNumbers').scrollTop = this.scrollTop;
+});
+
+// Tab support
+document.getElementById('codeEditor').addEventListener('keydown', function(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = this.selectionStart;
+    const end = this.selectionEnd;
+    this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+    this.selectionStart = this.selectionEnd = start + 4;
+    updateLineNumbers();
+  }
+  // Ctrl+Enter to run
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    runCode();
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  CODE EXECUTION
+// ═══════════════════════════════════════════════════════════
+async function runCode() {
+  if (isRunning || !pyodide) return;
+  isRunning = true;
+
+  const btn = document.getElementById('btnRun');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  hideResults();
+
+  const code = document.getElementById('codeEditor').value;
+
+  try {
+    // Redirect stdout
+    pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+`);
+
+    // Run user code
+    let error = null;
+    try {
+      pyodide.runPython(code);
+    } catch(e) {
+      error = e;
+    }
+
+    // Capture output
+    const stdout = pyodide.runPython('sys.stdout.getvalue()');
+    const stderr = pyodide.runPython('sys.stderr.getvalue()');
+
+    // Reset
+    pyodide.runPython(`
+import sys
+sys.stdout = sys.__stdout__
+sys.stderr = sys.__stderr__
+`);
+
+    if (error) {
+      const errMsg = error.message || String(error);
+      // Extract line number
+      let lineInfo = '';
+      const lineMatch = errMsg.match(/line (\d+)/);
+      if (lineMatch) {
+        lineInfo = ` (строка ${lineMatch[1]})`;
+      }
+
+      showOutput(errMsg, 'error');
+
+      // Determine hint based on error type
+      let hint = '';
+      if (errMsg.includes('SyntaxError')) {
+        hint = 'Синтаксическая ошибка. Проверьте скобки, кавычки и двоеточия.';
+      } else if (errMsg.includes('IndentationError')) {
+        hint = 'Ошибка отступов. Используйте 4 пробела для вложенных блоков.';
+      } else if (errMsg.includes('NameError')) {
+        const nameMatch = errMsg.match(/name '(\w+)'/);
+        hint = nameMatch
+          ? `Переменная "${nameMatch[1]}" не определена. Проверьте написание.`
+          : 'Использована неопределённая переменная.';
+      } else if (errMsg.includes('TypeError')) {
+        hint = 'Ошибка типов. Проверьте, что операции применяются к совместимым типам.';
+      } else if (errMsg.includes('IndexError')) {
+        hint = 'Индекс выходит за пределы. Проверьте длину списка/строки.';
+      } else if (errMsg.includes('KeyError')) {
+        hint = 'Такого ключа нет в словаре. Проверьте написание ключа.';
+      } else {
+        hint = 'Проверьте код и попробуйте ещё раз.';
+      }
+
+      showResult('error', '✗', `Ошибка${lineInfo}`, hint);
+    } else {
+      // Show stdout
+      if (stdout.trim()) {
+        showOutput(stdout.trimEnd(), 'info');
+      }
+
+      // Check answer
+      const task = TASKS[currentTask];
+      const result = task.check(stdout, code);
+
+      if (result.pass) {
+        completed.add(currentTask);
+        saveProgress();
+        updateProgress();
+        renderTaskList();
+        showResult('success', '✓', 'Отлично! Задача решена.',
+          currentTask < TASKS.length - 1 ? 'Нажмите «Далее» для следующей задачи.' : 'Это была последняя задача! 🎉');
+
+        if (completed.size === TASKS.length) {
+          setTimeout(() => {
+            document.getElementById('completionModal').classList.add('visible');
+          }, 1000);
+        }
+      } else {
+        showResult('warning', '⚠', 'Не совсем правильно', result.hint || 'Попробуйте ещё раз.');
+      }
+    }
+  } catch(e) {
+    showOutput(String(e), 'error');
+    showResult('error', '✗', 'Ошибка выполнения', 'Проверьте код и попробуйте ещё раз.');
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    isRunning = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function nextTask() {
+  if (currentTask < TASKS.length - 1) {
+    currentTask++;
+    renderTask();
+    document.getElementById('panelLeft').scrollTop = 0;
+  }
+}
+
+function prevTask() {
+  if (currentTask > 0) {
+    currentTask--;
+    renderTask();
+    document.getElementById('panelLeft').scrollTop = 0;
+  }
+}
+
+function goToTask(i) {
+  currentTask = i;
+  renderTask();
+  document.getElementById('panelLeft').scrollTop = 0;
+  toggleTaskList();
+}
+
+function resetCode() {
+  if (confirm('Сбросить код к начальному состоянию?')) {
+    document.getElementById('codeEditor').value = TASKS[currentTask].starter;
+    updateLineNumbers();
+    hideResults();
+  }
+}
+
+function toggleTaskList() {
+  const panel = document.getElementById('taskListPanel');
+  const overlay = document.getElementById('taskListOverlay');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  overlay.style.display = isOpen ? 'none' : 'block';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+renderTask();
+initPyodide();
+</script>
+</body>
+</html>

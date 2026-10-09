@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pyCamp — Python: типы данных и переменные</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐍</text></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono/index.css">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
+<style>
+:root{
+  --bg:#0a0a23;
+  --bg2:#10102a;
+  --card:#1b1b32;
+  --card2:#222242;
+  --border:#2e2e52;
+  --text:#ececf6;
+  --muted:#a2a2c4;
+  --accent:#f1be32;
+  --accent-hover:#ffd24d;
+  --green:#3fb950;
+  --red:#f85149;
+  --blue:#58a6ff;
+  --code-bg:#12122a;
+  --radius:12px;
+  --font:'Inter Variable','Inter',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono Variable','JetBrains Mono',Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.6;
+}
+button{font-family:inherit;cursor:pointer}
+code{font-family:var(--mono);background:rgba(241,190,50,.12);color:var(--accent);padding:2px 6px;border-radius:5px;font-size:.88em}
+
+/* ===== NAVBAR ===== */
+nav{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;gap:16px;
+  height:60px;padding:0 16px;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.25rem;letter-spacing:-.5px}
+.logo-mark{
+  width:34px;height:34px;border-radius:8px;
+  background:var(--accent);color:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;font-size:.95rem;
+}
+.logo span b{color:var(--accent)}
+.nav-progress{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted);white-space:nowrap}
+.nav-progress .bar{width:140px;height:8px;background:var(--card2);border-radius:99px;overflow:hidden}
+.nav-progress .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:99px;transition:width .5s ease}
+#menuBtn{
+  display:none;background:none;border:1px solid var(--border);border-radius:8px;
+  color:var(--text);width:40px;height:40px;font-size:1.2rem;
+}
+
+/* ===== LOADING OVERLAY ===== */
+#loadingOverlay{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(10,10,35,.96);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  text-align:center;padding:20px;
+}
+.spinner{
+  width:56px;height:56px;border-radius:50%;
+  border:5px solid var(--card2);border-top-color:var(--accent);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loadingOverlay p{color:var(--muted);max-width:420px}
+#loadingOverlay .err{color:var(--red)}
+
+/* ===== LAYOUT ===== */
+.layout{display:flex;min-height:calc(100vh - 60px)}
+aside{
+  width:300px;flex-shrink:0;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  position:sticky;top:60px;
+  height:calc(100vh - 60px);
+  overflow-y:auto;
+  padding:20px 14px;
+}
+aside h2{font-size:.8rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin:6px 10px 14px}
+.sidebar-progress{padding:0 10px 16px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.sidebar-progress .txt{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:8px}
+.sidebar-progress .txt b{color:var(--accent)}
+.sidebar-progress .bar{height:10px;background:var(--card2);border-radius:99px;overflow:hidden}
+.sidebar-progress .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .5s ease;border-radius:99px}
+.task-list{list-style:none;display:flex;flex-direction:column;gap:4px}
+.task-list li{
+  display:flex;align-items:center;gap:10px;
+  padding:10px;border-radius:8px;
+  font-size:.9rem;color:var(--muted);
+  cursor:pointer;transition:background .15s,color .15s;
+  border:1px solid transparent;
+}
+.task-list li:hover{background:var(--card);color:var(--text)}
+.task-list li .num{
+  width:26px;height:26px;flex-shrink:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--card2);font-size:.78rem;font-weight:700;color:var(--muted);
+}
+.task-list li.active{background:var(--card);color:var(--text);border-color:var(--border)}
+.task-list li.active .num{background:var(--accent);color:var(--bg)}
+.task-list li.solved .num{background:var(--green);color:#fff}
+.task-list li .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:190}
+
+main{flex:1;min-width:0;padding:28px clamp(16px,3vw,40px) 60px;max-width:1500px}
+
+/* ===== WELCOME ===== */
+#welcome{max-width:920px;margin:0 auto}
+.hero{
+  border-radius:var(--radius);overflow:hidden;
+  border:1px solid var(--border);
+  background:linear-gradient(135deg,#141433 0%,#1b1b3a 60%,#232348 100%);
+  margin-bottom:28px;
+}
+.hero svg{display:block;width:100%;height:auto}
+.course-badge{display:inline-block;background:rgba(241,190,50,.15);color:var(--accent);font-weight:700;font-size:.8rem;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border-radius:99px;margin-bottom:14px}
+h1.course-title{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:800;letter-spacing:-1px;margin-bottom:16px}
+.intro-text{color:var(--muted);font-size:1.05rem;margin-bottom:24px}
+.intro-text strong{color:var(--text)}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:30px}
+.feature{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.feature .ic{font-size:1.6rem;margin-bottom:8px}
+.feature h3{font-size:1rem;margin-bottom:4px}
+.feature p{font-size:.86rem;color:var(--muted)}
+
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 26px;border-radius:8px;border:none;
+  font-weight:700;font-size:.95rem;transition:all .15s;
+}
+.btn-yellow{background:var(--accent);color:var(--bg)}
+.btn-yellow:hover{background:var(--accent-hover);transform:translateY(-1px)}
+.btn-dark{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.btn-dark:hover{background:#2c2c52}
+.btn-outline{background:transparent;color:var(--accent);border:2px solid var(--accent);padding:10px 24px}
+.btn-outline:hover{background:rgba(241,190,50,.1)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-sm{padding:9px 16px;font-size:.87rem}
+
+/* ===== CHALLENGE ===== */
+#challenge{display:none}
+.ch-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.ch-num{font-size:.82rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.2px}
+.solved-badge{display:none;background:rgba(63,185,80,.15);color:var(--green);font-size:.78rem;font-weight:700;padding:4px 12px;border-radius:99px}
+.solved-badge.show{display:inline-block}
+.ch-title{font-size:clamp(1.35rem,3vw,1.9rem);font-weight:800;letter-spacing:-.5px;margin-bottom:22px}
+.ch-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:24px;align-items:start}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.panel-head{display:flex;align-items:center;gap:8px;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--card2);font-weight:700;font-size:.9rem}
+.panel-body{padding:20px 22px}
+.desc p{margin-bottom:12px;color:#d5d5e8}
+.desc strong{color:var(--text)}
+.desc ul,.desc ol{margin:0 0 14px 22px;color:#d5d5e8}
+.desc li{margin-bottom:6px}
+.example-label{font-size:.78rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;margin:16px 0 8px}
+pre.example{
+  background:var(--code-bg);border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;overflow-x:auto;
+  font-family:var(--mono);font-size:.86rem;line-height:1.65;color:#c9d1ff;
+}
+.note{background:rgba(88,166,255,.08);border-left:3px solid var(--blue);padding:10px 14px;border-radius:0 8px 8px 0;font-size:.86rem;color:#bcd6ff;margin-top:14px}
+.hint-box{display:none;margin-top:14px;background:rgba(241,190,50,.08);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 8px 8px 0;font-size:.9rem;color:#f3dfa8}
+.hint-box.show{display:block}
+
+/* editor */
+.editor-panel{display:flex;flex-direction:column}
+.editor-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--card2);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.dots{display:flex;gap:6px;margin-right:8px}
+.dots i{width:11px;height:11px;border-radius:50%}
+.dots i:nth-child(1){background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
+.filename{font-family:var(--mono);font-size:.8rem;color:var(--muted);margin-right:auto}
+.code-area{display:flex;background:var(--code-bg);height:340px;overflow:hidden}
+.gutter{
+  width:44px;flex-shrink:0;padding:12px 8px 12px 0;
+  text-align:right;font-family:var(--mono);font-size:13.5px;line-height:22px;
+  color:#4a4a72;overflow:hidden;user-select:none;background:var(--code-bg);
+}
+.gutter .gl.err{color:#fff;background:var(--red);border-radius:4px;font-weight:700}
+#editor{
+  flex:1;min-width:0;resize:none;border:none;outline:none;
+  background:transparent;color:#e6e6f5;
+  font-family:var(--mono);font-size:13.5px;line-height:22px;
+  padding:12px 14px;white-space:pre;overflow:auto;
+  tab-size:4;
+}
+#editor::selection{background:rgba(241,190,50,.3)}
+#editor.flash-err{animation:flashErr .5s ease 2}
+@keyframes flashErr{50%{box-shadow:inset 0 0 0 2px var(--red)}}
+.console{border-top:1px solid var(--border);background:#0d0d20;padding:12px 16px;min-height:64px;max-height:150px;overflow-y:auto}
+.console .cl{font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;margin-bottom:6px}
+#consoleOut{font-family:var(--mono);font-size:.84rem;color:#9fd6a5;white-space:pre-wrap;word-break:break-word}
+#consoleOut:empty::before{content:"(вывод программы появится здесь)";color:#55557d}
+.result{display:none;padding:14px 18px;border-radius:10px;margin-top:14px;font-size:.93rem;border:1px solid transparent;animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.97);opacity:0}to{transform:scale(1);opacity:1}}
+.result.show{display:block}
+.result.ok{background:rgba(63,185,80,.1);border-color:rgba(63,185,80,.45)}
+.result.fail{background:rgba(241,190,50,.08);border-color:rgba(241,190,50,.4)}
+.result.error{background:rgba(248,81,73,.09);border-color:rgba(248,81,73,.5)}
+.result.info{background:rgba(88,166,255,.08);border-color:rgba(88,166,255,.4)}
+.result .r-title{font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.result.ok .r-title{color:var(--green)}
+.result.fail .r-title{color:var(--accent)}
+.result.error .r-title{color:var(--red)}
+.result.info .r-title{color:var(--blue)}
+.result .errline{font-family:var(--mono);background:#0d0d20;border:1px solid var(--border);border-left:3px solid var(--red);border-radius:6px;padding:8px 12px;margin:8px 0;font-size:.84rem;color:#ffd9d6;overflow-x:auto;white-space:pre}
+.result .r-hint{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.15);color:#f3dfa8}
+.result .r-hint b{color:var(--accent)}
+.result p{margin-bottom:6px;color:#d5d5e8}
+
+/* nav footer */
+.ch-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:28px;flex-wrap:wrap}
+.kbd-tip{font-size:.8rem;color:var(--muted)}
+.kbd{font-family:var(--mono);background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:1px 7px;font-size:.78rem}
+
+/* ===== MODAL ===== */
+#modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(5,5,20,.85);align-items:center;justify-content:center;padding:20px}
+#modal.show{display:flex}
+.modal-card{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  max-width:480px;width:100%;padding:40px 34px;text-align:center;
+  animation:pop .35s ease;
+}
+.modal-card .trophy{font-size:4rem;animation:bounce 1s ease infinite alternate}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+.modal-card h2{font-size:1.6rem;margin:14px 0 10px}
+.modal-card p{color:var(--muted);margin-bottom:24px}
+.modal-card .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+footer.site{border-top:1px solid var(--border);padding:20px;text-align:center;color:var(--muted);font-size:.84rem}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:1100px){
+  .ch-grid{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  #menuBtn{display:flex;align-items:center;justify-content:center}
+  aside{
+    position:fixed;left:0;top:60px;z-index:200;
+    transform:translateX(-105%);transition:transform .25s ease;
+    width:290px;height:calc(100vh - 60px);
+  }
+  aside.open{transform:translateX(0)}
+  #backdrop.show{display:block}
+  .nav-progress .bar{width:80px}
+  .nav-progress .txt{display:none}
+}
+@media (max-width:520px){
+  main{padding:20px 14px 50px}
+  .code-area{height:300px}
+  .btn{padding:11px 18px}
+  .nav-progress{font-size:.75rem;gap:6px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <h2>Загружаем Python…</h2>
+  <p id="loadingText">Интерпретатор Pyodide загружается прямо в браузер (≈10 МБ). Это может занять 10–30 секунд при первом запуске.</p>
+  <button class="btn btn-outline" id="retryBtn" style="display:none" onclick="location.reload()">Повторить загрузку</button>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <button id="menuBtn" aria-label="Меню">☰</button>
+  <div class="logo"><div class="logo-mark">py</div><span>py<b>Camp</b></span></div>
+  <div class="nav-progress">
+    <span class="txt">Решено: <b id="navCount">0/15</b></span>
+    <div class="bar"><div class="fill" id="navFill"></div></div>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-progress">
+      <div class="txt"><span>Прогресс курса</span><span><b id="sideCount">0</b> / 15</span></div>
+      <div class="bar"><div class="fill" id="sideFill"></div></div>
+    </div>
+    <h2>Типы данных и переменные</h2>
+    <ul class="task-list" id="taskList"></ul>
+  </aside>
+  <div id="backdrop"></div>
+
+  <main>
+    <!-- WELCOME SCREEN -->
+    <section id="welcome">
+      <div class="hero">
+        <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Иллюстрация курса Python">
+          <defs>
+            <linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#141433"/><stop offset="1" stop-color="#232348"/>
+            </linearGradient>
+          </defs>
+          <rect width="800" height="300" fill="url(#bgg)"/>
+          <circle cx="90" cy="60" r="34" fill="#f1be32" opacity=".14"/>
+          <circle cx="720" cy="240" r="52" fill="#3776ab" opacity=".2"/>
+          <circle cx="640" cy="50" r="16" fill="#f1be32" opacity=".3"/>
+          <rect x="52" y="120" width="26" height="26" rx="6" fill="#3776ab" opacity=".45"/>
+          <rect x="700" y="110" width="22" height="22" rx="5" fill="#3fb950" opacity=".35"/>
+          <!-- editor window -->
+          <g>
+            <rect x="240" y="60" width="330" height="190" rx="14" fill="#0d0d20" stroke="#2e2e52" stroke-width="2"/>
+            <rect x="240" y="60" width="330" height="34" rx="14" fill="#1b1b32"/>
+            <rect x="240" y="80" width="330" height="14" fill="#1b1b32"/>
+            <circle cx="262" cy="77" r="6" fill="#ff5f57"/><circle cx="282" cy="77" r="6" fill="#febc2e"/><circle cx="302" cy="77" r="6" fill="#28c840"/>
+            <text x="266" y="128" font-family="monospace" font-size="16" fill="#58a6ff">city</text>
+            <text x="304" y="128" font-family="monospace" font-size="16" fill="#ececf6">=</text>
+            <text x="322" y="128" font-family="monospace" font-size="16" fill="#f1be32">"Москва"</text>
+            <text x="266" y="156" font-family="monospace" font-size="16" fill="#58a6ff">age</text>
+            <text x="298" y="156" font-family="monospace" font-size="16" fill="#ececf6">=</text>
+            <text x="316" y="156" font-family="monospace" font-size="16" fill="#3fb950">25</text>
+            <text x="266" y="184" font-family="monospace" font-size="16" fill="#58a6ff">is_dev</text>
+            <text x="328" y="184" font-family="monospace" font-size="16" fill="#ececf6">=</text>
+            <text x="346" y="184" font-family="monospace" font-size="16" fill="#d28bff">True</text>
+            <text x="266" y="212" font-family="monospace" font-size="16" fill="#c9d1ff">print(city, age)</text>
+            <rect x="418" y="200" width="2" height="16" fill="#f1be32"/>
+          </g>
+          <!-- floating type icons -->
+          <g font-family="monospace" font-weight="bold">
+            <rect x="130" y="70" width="70" height="44" rx="10" fill="#1b1b32" stroke="#f1be32" stroke-width="2"/>
+            <text x="165" y="98" font-size="18" fill="#f1be32" text-anchor="middle">int</text>
+            <rect x="120" y="170" width="82" height="44" rx="10" fill="#1b1b32" stroke="#58a6ff" stroke-width="2"/>
+            <text x="161" y="198" font-size="18" fill="#58a6ff" text-anchor="middle">str</text>
+            <rect x="612" y="80" width="86" height="44" rx="10" fill="#1b1b32" stroke="#3fb950" stroke-width="2"/>
+            <text x="655" y="108" font-size="18" fill="#3fb950" text-anchor="middle">bool</text>
+            <rect x="600" y="170" width="80" height="44" rx="10" fill="#1b1b32" stroke="#d28bff" stroke-width="2"/>
+            <text x="640" y="198" font-size="18" fill="#d28bff" text-anchor="middle">list</text>
+          </g>
+          <!-- snake -->
+          <g transform="translate(405,258)">
+            <path d="M -60 10 q 15 -22 30 0 q 15 22 30 0 q 15 -22 30 0" fill="none" stroke="#f1be32" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="-66" cy="14" r="10" fill="#f1be32"/>
+            <circle cx="-69" cy="11" r="2" fill="#0a0a23"/>
+          </g>
+        </svg>
+      </div>
+      <span class="course-badge">Интерактивный курс · 15 задач</span>
+      <h1 class="course-title">Типы данных и переменные в Python</h1>
+      <p class="intro-text">
+        Переменные — это фундамент любой программы. В этом курсе вы научитесь создавать переменные,
+        работать с <strong>числами (int, float)</strong>, <strong>строками (str)</strong>, <strong>логическим типом (bool)</strong>,
+        <strong>списками (list)</strong> и <strong>словарями (dict)</strong>, преобразовывать типы друг в друга
+        и соберёте всё это в <strong>финальном проекте «Анкета»</strong>.
+        Код выполняется <strong>прямо в браузере</strong> — ничего устанавливать не нужно.
+      </p>
+      <div class="features">
+        <div class="feature"><div class="ic">⌨️</div><h3>15 практических задач</h3><p>От первой переменной до словарей и срезов — сложность растёт постепенно.</p></div>
+        <div class="feature"><div class="ic">🐍</div><h3>Настоящий Python</h3><p>Ваш код запускается интерпретатором Pyodide прямо в браузере.</p></div>
+        <div class="feature"><div class="ic">🎯</div><h3>Мгновенная проверка</h3><p>Автотесты покажут номер строки с ошибкой и дадут подсказку.</p></div>
+        <div class="feature"><div class="ic">🏆</div><h3>Финальный проект</h3><p>Последняя задача объединяет все темы курса в одну программу.</p></div>
+      </div>
+      <button class="btn btn-yellow" id="startBtn" style="font-size:1.05rem;padding:15px 40px">Начать курс →</button>
+    </section>
+
+    <!-- CHALLENGE SCREEN -->
+    <section id="challenge">
+      <div class="ch-head">
+        <span class="ch-num" id="chNum">Задача 1 из 15</span>
+        <span class="solved-badge" id="solvedBadge">✓ Решено</span>
+      </div>
+      <h1 class="ch-title" id="chTitle"></h1>
+      <div class="ch-grid">
+        <!-- DESCRIPTION -->
+        <div class="panel">
+          <div class="panel-head">📖 Описание задачи</div>
+          <div class="panel-body">
+            <div class="desc" id="chDesc"></div>
+            <div id="exampleWrap">
+              <div class="example-label">Пример</div>
+              <pre class="example" id="chExample"></pre>
+            </div>
+            <div class="note" id="chNote">⚠️ Функция <code>input()</code> в тренажёре не используется — все данные уже заданы в стартовом коде.</div>
+            <button class="btn btn-dark btn-sm" id="hintBtn" style="margin-top:16px">💡 Показать подсказку</button>
+            <div class="hint-box" id="hintBox"></div>
+          </div>
+        </div>
+        <!-- EDITOR -->
+        <div>
+          <div class="panel editor-panel">
+            <div class="editor-toolbar">
+              <div class="dots"><i></i><i></i><i></i></div>
+              <span class="filename">task.py</span>
+              <button class="btn btn-dark btn-sm" id="resetBtn" title="Восстановить стартовый код">↺ Сброс</button>
+              <button class="btn btn-dark btn-sm" id="runBtn">▶ Запустить</button>
+              <button class="btn btn-yellow btn-sm" id="checkBtn">Проверить</button>
+            </div>
+            <div class="code-area">
+              <div class="gutter" id="gutter"></div>
+              <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+            </div>
+            <div class="console">
+              <div class="cl">Вывод программы</div>
+              <div id="consoleOut"></div>
+            </div>
+          </div>
+          <div class="result" id="result"></div>
+        </div>
+      </div>
+      <div class="ch-footer">
+        <button class="btn btn-dark" id="prevBtn">← Предыдущая</button>
+        <span class="kbd-tip"><span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> — проверить</span>
+        <button class="btn btn-yellow" id="nextBtn">Следующая →</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- COMPLETION MODAL -->
+<div id="modal">
+  <div class="modal-card">
+    <div class="trophy">🏆</div>
+    <h2>Курс пройден!</h2>
+    <p>Поздравляем! Вы решили все 15 задач курса «Типы данных и переменные в Python». Вы умеете работать с числами, строками, списками, словарями и преобразовывать типы данных. Так держать!</p>
+    <div class="btns">
+      <button class="btn btn-yellow" onclick="closeModal();goTo(0)">К задаче 1</button>
+      <button class="btn btn-dark" onclick="resetProgress()">Пройти заново</button>
+    </div>
+  </div>
+</div>
+
+<footer class="site">pyCamp — бесплатный интерактивный тренажёр Python. Код выполняется в браузере с помощью Pyodide 🐍</footer>
+
+<script>
+/* ================= ДАННЫЕ КУРСА ================= */
+const PYODIDE_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/';
+
+const PRE = `
+class CheckFail(Exception):
+    pass
+
+def _need(name, msg=None):
+    if name not in globals():
+        if msg:
+            raise CheckFail(msg)
+        raise CheckFail('Переменная ' + name + ' не найдена — создайте её в редакторе.')
+    return globals()[name]
+
+def _tname(v):
+    return type(v).__name__
+`;
+
+const TASKS = [
+{
+  title: 'Первая переменная',
+  desc: `<p>Переменная — это «коробка» с именем, в которой хранится значение. Имя придумывает программист, а значение записывается через знак <code>=</code>.</p>
+  <p><strong>Задание:</strong></p>
+  <ul>
+    <li>создайте переменную <code>city</code> и запишите в неё строку <code>"Москва"</code>;</li>
+    <li>выведите её на экран с помощью <code>print(city)</code>.</li>
+  </ul>`,
+  example: `name = "Python"\nprint(name)`,
+  starter: `# 1. Создайте переменную city со значением "Москва"\n# 2. Выведите её на экран с помощью print()\n`,
+  hint: 'Строки записываются в кавычках: city = "Москва". Чтобы вывести значение на экран, используйте print(city).',
+  verify: `
+city = _need('city', 'Переменная city не найдена. Создайте её, например: city = "..."')
+if not isinstance(city, str):
+    raise CheckFail('Значение city должно быть строкой (str), а у вас тип ' + _tname(city) + '. Строки записываются в кавычках: "Москва".')
+if city != 'Москва':
+    raise CheckFail('Переменная city должна содержать строку "Москва", а не "' + str(city) + '".')
+if 'Москва' not in _stdout:
+    raise CheckFail('Программа должна вывести «Москва» на экран. Добавьте print(city).')
+`
+},
+{
+  title: 'Числа: int и float',
+  desc: `<p>В Python есть два основных числовых типа: <code>int</code> — целые числа (42, −7, 2025) и <code>float</code> — дробные числа с точкой (3.14, 9.99).</p>
+  <p><strong>Задание. Создайте две переменные:</strong></p>
+  <ul>
+    <li><code>age</code> — целое число (<code>int</code>) со значением <code>25</code>;</li>
+    <li><code>price</code> — дробное число (<code>float</code>) со значением <code>9.99</code>.</li>
+  </ul>`,
+  example: `count = 10        # int\nweight = 2.5      # float\nprint(type(count))  # <class 'int'>`,
+  starter: `# Создайте две переменные:\n# age   — целое число (int) со значением 25\n# price — дробное число (float) со значением 9.99\n`,
+  hint: 'Целые числа пишутся без кавычек и без точки: age = 25. Дробные — с точкой: price = 9.99. Значение в кавычках — это строка, а не число!',
+  verify: `
+age = _need('age', 'Создайте переменную age.')
+price = _need('price', 'Создайте переменную price.')
+if isinstance(age, bool) or not isinstance(age, int):
+    raise CheckFail('age должно быть целым числом (int) — без кавычек и точки. У вас тип: ' + _tname(age) + '.')
+if age != 25:
+    raise CheckFail('age должно равняться 25.')
+if not isinstance(price, float):
+    raise CheckFail('price должно быть дробным числом (float) — с точкой и без кавычек. У вас тип: ' + _tname(price) + '.')
+if abs(price - 9.99) > 1e-9:
+    raise CheckFail('price должно равняться 9.99.')
+`
+},
+{
+  title: 'Арифметические операции',
+  desc: `<p>Переменные можно использовать в вычислениях: <code>+</code> — сложение, <code>-</code> — вычитание, <code>*</code> — умножение, <code>%</code> — остаток от деления.</p>
+  <p><strong>Задание.</strong> Даны переменные <code>a = 7</code> и <code>b = 3</code>. Не меняя их, создайте:</p>
+  <ul>
+    <li><code>total</code> — сумма a и b;</li>
+    <li><code>diff</code> — разность a и b;</li>
+    <li><code>product</code> — произведение a и b;</li>
+    <li><code>remainder</code> — остаток от деления a на b.</li>
+  </ul>`,
+  example: `x = 10\ny = 4\nprint(x + y)   # 14\nprint(x % y)   # 2 — остаток`,
+  starter: `a = 7\nb = 3\n\n# Не меняя a и b, создайте переменные:\n# total     — сумма a и b\n# diff      — разность a и b\n# product   — произведение a и b\n# remainder — остаток от деления a на b\n`,
+  hint: 'Используйте операторы: a + b, a - b, a * b и остаток от деления a % b. Результат каждого выражения запишите в свою переменную.',
+  verify: `
+a = _need('a'); b = _need('b')
+if a != 7 or b != 3:
+    raise CheckFail('Не меняйте исходные значения переменных a и b.')
+total = _need('total', 'Создайте переменную total — сумму a и b.')
+diff = _need('diff', 'Создайте переменную diff — разность a и b.')
+product = _need('product', 'Создайте переменную product — произведение a и b.')
+remainder = _need('remainder', 'Создайте переменную remainder — остаток от деления a на b.')
+if total != 10:
+    raise CheckFail('total должно равняться 10 (a + b). У вас: ' + str(total))
+if diff != 4:
+    raise CheckFail('diff должно равняться 4 (a - b). У вас: ' + str(diff))
+if product != 21:
+    raise CheckFail('product должно равняться 21 (a * b). У вас: ' + str(product))
+if remainder != 1:
+    raise CheckFail('remainder должно равняться 1 (a % b). У вас: ' + str(remainder))
+`
+},
+{
+  title: 'Склеивание строк (конкатенация)',
+  desc: `<p>Строки можно «склеивать» оператором <code>+</code>. Важно: пробел — это тоже строка, его нужно добавлять отдельно.</p>
+  <p><strong>Задание.</strong> Даны <code>first_name = "Иван"</code> и <code>last_name = "Петров"</code>. Создайте переменную <code>full_name</code>, склеив имя, пробел и фамилию <strong>из этих переменных</strong> (не вписывайте готовый текст вручную).</p>`,
+  example: `a = "Hello"\nb = "World"\nc = a + ", " + b\nprint(c)  # Hello, World`,
+  starter: `first_name = "Иван"\nlast_name = "Петров"\n\n# Создайте переменную full_name:\n# склейте first_name, пробел и last_name через оператор +\n`,
+  hint: 'Решение выглядит так: full_name = first_name + " " + last_name. Пробел " " обязателен, иначе получится «ИванПетров».',
+  verify: `
+first_name = _need('first_name'); last_name = _need('last_name')
+if first_name != 'Иван' or last_name != 'Петров':
+    raise CheckFail('Не меняйте исходные переменные first_name и last_name.')
+full_name = _need('full_name', 'Создайте переменную full_name.')
+if not isinstance(full_name, str):
+    raise CheckFail('full_name должно быть строкой (str).')
+if full_name != 'Иван Петров':
+    raise CheckFail('full_name должно быть равно "Иван Петров": имя, пробел и фамилия. У вас: "' + str(full_name) + '".')
+_assigned = [l for l in _source.split('\\n') if l.strip().startswith('full_name')]
+if not _assigned or '+' not in _assigned[0] or 'first_name' not in _assigned[0]:
+    raise CheckFail('Соберите full_name из переменных first_name и last_name через оператор +, а не вписывайте готовую строку вручную.')
+`
+},
+{
+  title: 'Повторение строк',
+  desc: `<p>Строку можно умножить на целое число — она повторится столько раз: <code>"ab" * 3</code> → <code>"ababab"</code>.</p>
+  <p><strong>Задание.</strong> Дана переменная <code>word = "ha"</code>. Создайте:</p>
+  <ul>
+    <li><code>laugh</code> — строка <code>word</code>, повторённая 5 раз;</li>
+    <li><code>row</code> — строка ровно из 20 знаков <code>=</code>.</li>
+  </ul>`,
+  example: `line = "-" * 10\nprint(line)  # ----------`,
+  starter: `word = "ha"\n\n# laugh — строка word, повторённая 5 раз\n# row   — строка из 20 знаков "="\n`,
+  hint: 'Используйте умножение строки на число: laugh = word * 5, а row = "=" * 20.',
+  verify: `
+word = _need('word')
+if word != 'ha':
+    raise CheckFail('Не меняйте значение переменной word.')
+laugh = _need('laugh', 'Создайте переменную laugh — word, повторённое 5 раз.')
+if laugh != 'ha' * 5:
+    raise CheckFail('laugh должно быть результатом word * 5 — строкой "hahahahahaha" (10 символов).')
+row = _need('row', 'Создайте переменную row — строку из 20 знаков "=".')
+if row != '=' * 20:
+    raise CheckFail('row должна состоять ровно из 20 знаков "=". Используйте "=" * 20.')
+if '*' not in _source:
+    raise CheckFail('Используйте умножение строки на число (*), а не пишите строку вручную.')
+`
+},
+{
+  title: 'f-строки',
+  desc: `<p>f-строка — современный способ вставлять значения переменных прямо в текст. Перед кавычкой ставится буква <code>f</code>, а переменные записываются в <code>{фигурных скобках}</code>.</p>
+  <p><strong>Задание.</strong> Даны <code>name = "Анна"</code> и <code>age = 30</code>. Создайте переменную <code>greeting</code> — f-строку с текстом:</p>
+  <p><code>Меня зовут Анна, мне 30 лет</code></p>
+  <p>(имя и возраст должны подставляться из переменных).</p>`,
+  example: `city = "Париж"\nyear = 2024\nmsg = f"Город {city}, год {year}"\nprint(msg)  # Город Париж, год 2024`,
+  starter: `name = "Анна"\nage = 30\n\n# Создайте greeting — f-строку вида:\n# Меня зовут Анна, мне 30 лет\n`,
+  hint: 'f-строка начинается с буквы f перед кавычкой, а переменные пишутся в фигурных скобках: f"Меня зовут {name}, мне {age} лет".',
+  verify: `
+name = _need('name'); age = _need('age')
+if name != 'Анна' or age != 30:
+    raise CheckFail('Не меняйте исходные значения name и age.')
+greeting = _need('greeting', 'Создайте переменную greeting.')
+if not isinstance(greeting, str):
+    raise CheckFail('greeting должно быть строкой (str).')
+expected = 'Меня зовут ' + str(name) + ', мне ' + str(age) + ' лет'
+if greeting != expected:
+    raise CheckFail('greeting должно быть равно: "' + expected + '". У вас: "' + str(greeting) + '".')
+if 'f"' not in _source and "f'" not in _source:
+    raise CheckFail('Используйте именно f-строку (буква f перед кавычкой), а не склеивание через +.')
+`
+},
+{
+  title: 'Преобразование типов',
+  desc: `<p>Тип значения можно изменить функциями: <code>int()</code> — в целое число, <code>float()</code> — в дробное, <code>str()</code> — в строку.</p>
+  <p><strong>Задание.</strong> Даны строки <code>num_str = "42"</code> и <code>pi_str = "3.14"</code>. Создайте:</p>
+  <ul>
+    <li><code>num_int</code> — целое число из <code>num_str</code>;</li>
+    <li><code>pi_float</code> — дробное число из <code>pi_str</code>;</li>
+    <li><code>back_str</code> — строку, полученную обратно из <code>num_int</code>.</li>
+  </ul>`,
+  example: `s = "100"\nn = int(s)      # 100 (число)\nf = float("1.5") # 1.5\nback = str(n)    # "100" (строка)`,
+  starter: `num_str = "42"\npi_str = "3.14"\n\n# num_int  — целое число из num_str\n# pi_float — дробное число из pi_str\n# back_str — строка, полученная из num_int\n`,
+  hint: 'Используйте функции преобразования: num_int = int(num_str), pi_float = float(pi_str), back_str = str(num_int).',
+  verify: `
+num_str = _need('num_str'); pi_str = _need('pi_str')
+num_int = _need('num_int', 'Создайте переменную num_int.')
+if isinstance(num_int, bool) or not isinstance(num_int, int):
+    raise CheckFail('num_int должно быть целым числом (int). Преобразуйте строку: int(num_str). У вас тип: ' + _tname(num_int) + '.')
+if num_int != 42:
+    raise CheckFail('num_int должно равняться 42.')
+pi_float = _need('pi_float', 'Создайте переменную pi_float.')
+if not isinstance(pi_float, float):
+    raise CheckFail('pi_float должно быть дробным числом (float). Преобразуйте строку: float(pi_str). У вас тип: ' + _tname(pi_float) + '.')
+if abs(pi_float - 3.14) > 1e-9:
+    raise CheckFail('pi_float должно равняться 3.14.')
+back_str = _need('back_str', 'Создайте переменную back_str.')
+if not isinstance(back_str, str):
+    raise CheckFail('back_str должно быть строкой (str). Преобразуйте число обратно: str(num_int).')
+if back_str != '42':
+    raise CheckFail('back_str должно быть равно "42".')
+if 'int(' not in _source or 'float(' not in _source or 'str(' not in _source:
+    raise CheckFail('Используйте функции преобразования типов: int(), float() и str().')
+`
+},
+{
+  title: 'Логический тип bool',
+  desc: `<p>Тип <code>bool</code> имеет всего два значения: <code>True</code> (истина) и <code>False</code> (ложь). Результатом операторов сравнения (<code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>==</code>) всегда является bool.</p>
+  <p><strong>Задание.</strong> Даны <code>age = 20</code> и <code>temperature = 36.6</code>. Создайте, используя <strong>операторы сравнения</strong>:</p>
+  <ul>
+    <li><code>is_adult</code> — True, если age больше либо равно 18;</li>
+    <li><code>is_hot</code> — True, если temperature больше 37.</li>
+  </ul>`,
+  example: `speed = 90\ntoo_fast = speed > 80\nprint(too_fast)       # True\nprint(type(too_fast)) # <class 'bool'>`,
+  starter: `age = 20\ntemperature = 36.6\n\n# is_adult — True, если age >= 18\n# is_hot   — True, если temperature > 37\n`,
+  hint: 'Не пишите True/False вручную — пусть их вычислит сравнение: is_adult = age >= 18, is_hot = temperature > 37.',
+  verify: `
+age = _need('age'); temperature = _need('temperature')
+if age != 20 or temperature != 36.6:
+    raise CheckFail('Не меняйте исходные значения age и temperature.')
+is_adult = _need('is_adult', 'Создайте переменную is_adult.')
+if not isinstance(is_adult, bool):
+    raise CheckFail('is_adult должно быть типа bool (True/False). У вас тип: ' + _tname(is_adult) + '.')
+if is_adult is not True:
+    raise CheckFail('is_adult должно быть True: при age = 20 условие age >= 18 выполняется.')
+is_hot = _need('is_hot', 'Создайте переменную is_hot.')
+if not isinstance(is_hot, bool):
+    raise CheckFail('is_hot должно быть типа bool (True/False). У вас тип: ' + _tname(is_hot) + '.')
+if is_hot is not False:
+    raise CheckFail('is_hot должно быть False: 36.6 не больше 37.')
+if '>=' not in _source:
+    raise CheckFail('Для is_adult используйте оператор сравнения >=.')
+if '>' not in _source.replace('>=', ''):
+    raise CheckFail('Для is_hot используйте оператор сравнения >.')
+`
+},
+{
+  title: 'Обмен значений',
+  desc: `<p>В Python можно поменять значения двух переменных местами <strong>одной строкой</strong>, без временной переменной — это называется множественным присваиванием.</p>
+  <p><strong>Задание.</strong> Даны <code>x = 10</code> и <code>y = 5</code>. Обменяйте их значения так, чтобы стало <code>x = 5</code>, <code>y = 10</code>. Решите задачу «питоновским» способом — одной строкой, не присваивая числа вручную.</p>`,
+  example: `a = 1\nb = 2\na, b = b, a\nprint(a, b)  # 2 1`,
+  starter: `x = 10\ny = 5\n\n# Обменяйте значения x и y одной строкой\n# (без третьей переменной и без ручного ввода чисел)\n`,
+  hint: 'Слева от знака равенства перечислите переменные через запятую, а справа — те же переменные в обратном порядке: x, y = y, x.',
+  verify: `
+x = _need('x'); y = _need('y')
+s = _source.replace(' ', '').replace('\\t', '')
+if 'x,y=y,x' not in s:
+    raise CheckFail('Используйте обмен одной строкой: x, y = y, x. Присваивать числа вручную (x = 5) нельзя.')
+if x != 5 or y != 10:
+    raise CheckFail('После обмена x должно быть 5, а y — 10. Сейчас x = ' + str(x) + ', y = ' + str(y) + '.')
+`
+},
+{
+  title: 'Длина строки и регистр',
+  desc: `<p>У строк есть полезные методы и функции: <code>len(s)</code> — длина (количество символов), <code>s.upper()</code> — копия строки в ВЕРХНЕМ регистре, <code>s.lower()</code> — в нижнем.</p>
+  <p><strong>Задание.</strong> Дана строка <code>message = "привет, мир"</code>. Создайте:</p>
+  <ul>
+    <li><code>upper_msg</code> — ту же строку в верхнем регистре;</li>
+    <li><code>msg_len</code> — длину строки (целое число).</li>
+  </ul>`,
+  example: `s = "Python"\nprint(s.upper())  # PYTHON\nprint(len(s))     # 6`,
+  starter: `message = "привет, мир"\n\n# upper_msg — та же строка в верхнем регистре\n# msg_len   — длина строки (целое число)\n`,
+  hint: 'Методы пишутся через точку после переменной: message.upper(). Длина — функция len(message). Методы не меняют исходную строку, а возвращают новую.',
+  verify: `
+message = _need('message')
+if message != 'привет, мир':
+    raise CheckFail('Не меняйте исходную строку message.')
+upper_msg = _need('upper_msg', 'Создайте переменную upper_msg.')
+if upper_msg != 'ПРИВЕТ, МИР':
+    raise CheckFail('upper_msg должно быть строкой в ВЕРХНЕМ регистре: "ПРИВЕТ, МИР". Используйте message.upper().')
+msg_len = _need('msg_len', 'Создайте переменную msg_len.')
+if isinstance(msg_len, bool) or not isinstance(msg_len, int):
+    raise CheckFail('msg_len должно быть целым числом (int). У вас тип: ' + _tname(msg_len) + '.')
+if msg_len != 11:
+    raise CheckFail('msg_len должно равняться 11 — используйте len(message). У вас: ' + str(msg_len))
+`
+},
+{
+  title: 'Срезы строк',
+  desc: `<p>Срез <code>s[start:stop]</code> возвращает часть строки. Если start не указать — с начала, если stop — до конца. Отрицательные индексы считаются с конца, а <code>s[::-1]</code> переворачивает строку.</p>
+  <p><strong>Задание.</strong> Дана строка <code>word = "Python"</code>. Создайте <strong>с помощью срезов</strong>:</p>
+  <ul>
+    <li><code>first_three</code> — первые 3 символа;</li>
+    <li><code>last_two</code> — последние 2 символа;</li>
+    <li><code>backwards</code> — строку задом наперёд.</li>
+  </ul>`,
+  example: `s = "abcdef"\nprint(s[:3])   # abc\nprint(s[-2:])  # ef\nprint(s[::-1]) # fedcba`,
+  starter: `word = "Python"\n\n# first_three — первые 3 символа (срез)\n# last_two    — последние 2 символа\n# backwards   — строка наоборот\n`,
+  hint: 'Первые 3 символа: word[:3]. Последние 2: word[-2:]. Наоборот: word[::-1]. Решайте именно срезами, а не вручную.',
+  verify: `
+word = _need('word')
+if word != 'Python':
+    raise CheckFail('Не меняйте значение переменной word.')
+first_three = _need('first_three', 'Создайте переменную first_three.')
+if first_three != 'Pyt':
+    raise CheckFail('first_three должно быть равно "Pyt" — срез word[:3].')
+last_two = _need('last_two', 'Создайте переменную last_two.')
+if last_two != 'on':
+    raise CheckFail('last_two должно быть равно "on" — срез word[-2:].')
+backwards = _need('backwards', 'Создайте переменную backwards.')
+if backwards != 'nohtyP':
+    raise CheckFail('backwards должно быть равно "nohtyP" — срез word[::-1].')
+if '[' not in _source or ':' not in _source:
+    raise CheckFail('Используйте срезы вида word[:3], word[-2:], word[::-1], а не вписывайте готовые строки.')
+`
+},
+{
+  title: 'Списки (тип list)',
+  desc: `<p>Список хранит несколько значений в порядке очереди. Он создаётся в <code>[квадратных скобках]</code>, элементы разделяются запятыми. Индексация начинается <strong>с нуля</strong>.</p>
+  <p><strong>Задание. Создайте:</strong></p>
+  <ul>
+    <li><code>colors</code> — список из трёх строк: <code>"красный"</code>, <code>"зелёный"</code>, <code>"синий"</code> (именно в этом порядке, с буквой «ё»);</li>
+    <li><code>first_color</code> — первый элемент списка;</li>
+    <li><code>count</code> — количество элементов списка.</li>
+  </ul>`,
+  example: `fruits = ["яблоко", "банан"]\nprint(fruits[0])   # яблоко\nprint(len(fruits)) # 2`,
+  starter: `# colors — список из трёх строк:\n# "красный", "зелёный", "синий"\n# first_color — первый элемент списка\n# count — количество элементов (len)\n`,
+  hint: 'Список: colors = ["красный", "зелёный", "синий"]. Первый элемент: colors[0] (индексы начинаются с нуля). Количество: len(colors).',
+  verify: `
+colors = _need('colors', 'Создайте список colors.')
+if not isinstance(colors, list):
+    raise CheckFail('colors должен быть списком (list) — элементы в квадратных скобках через запятую. У вас тип: ' + _tname(colors) + '.')
+if colors != ['красный', 'зелёный', 'синий']:
+    raise CheckFail('Список должен быть таким: ["красный", "зелёный", "синий"]. Проверьте порядок и текст (не забудьте букву «ё»).')
+first_color = _need('first_color', 'Создайте переменную first_color.')
+if first_color != 'красный':
+    raise CheckFail('first_color должен быть первым элементом списка: colors[0].')
+count = _need('count', 'Создайте переменную count.')
+if isinstance(count, bool) or not isinstance(count, int) or count != 3:
+    raise CheckFail('count должно быть целым числом 3 — используйте len(colors).')
+`
+},
+{
+  title: 'Словари (тип dict)',
+  desc: `<p>Словарь хранит пары «ключ → значение» в <code>{фигурных скобках}</code>. Значение достаётся по ключу: <code>d["key"]</code>, а добавляется присваиванием: <code>d["new"] = 1</code>.</p>
+  <p><strong>Задание. Создайте:</strong></p>
+  <ul>
+    <li><code>user</code> — словарь с ключами <code>"name"</code> (значение <code>"Олег"</code>) и <code>"age"</code> (значение <code>25</code>);</li>
+    <li><code>user_name</code> — значение по ключу <code>"name"</code>;</li>
+    <li>добавьте в словарь ключ <code>"city"</code> со значением <code>"Казань"</code>;</li>
+    <li><code>keys_count</code> — количество ключей в словаре.</li>
+  </ul>`,
+  example: `cat = {"name": "Барсик", "age": 3}\nprint(cat["name"])   # Барсик\ncat["color"] = "рыжий"\nprint(len(cat))      # 3`,
+  starter: `# user — словарь с ключами "name" (значение "Олег")\n# и "age" (значение 25)\n# user_name — значение по ключу "name"\n# Добавьте в словарь ключ "city" со значением "Казань"\n# keys_count — количество ключей в словаре\n`,
+  hint: 'Словарь: user = {"name": "Олег", "age": 25}. Чтение: user["name"]. Добавление: user["city"] = "Казань". Количество ключей: len(user).',
+  verify: `
+user = _need('user', 'Создайте словарь user.')
+if not isinstance(user, dict):
+    raise CheckFail('user должен быть словарём (dict) — пары "ключ": значение в фигурных скобках. У вас тип: ' + _tname(user) + '.')
+if user.get('name') != 'Олег':
+    raise CheckFail('В словаре user ключ "name" должен иметь значение "Олег".')
+if user.get('age') != 25:
+    raise CheckFail('В словаре user ключ "age" должен иметь значение 25.')
+user_name = _need('user_name', 'Создайте переменную user_name.')
+if user_name != 'Олег':
+    raise CheckFail('user_name должен содержать значение по ключу "name": user["name"].')
+if user.get('city') != 'Казань':
+    raise CheckFail('Добавьте в словарь ключ "city" со значением "Казань": user["city"] = "Казань".')
+keys_count = _need('keys_count', 'Создайте переменную keys_count.')
+if keys_count != 3:
+    raise CheckFail('keys_count должно равняться 3 — используйте len(user).')
+`
+},
+{
+  title: 'None и проверка типов: isinstance()',
+  desc: `<p>Специальное значение <code>None</code> означает «ничего / пусто». А функция <code>isinstance(значение, тип)</code> проверяет, имеет ли значение нужный тип, и возвращает <code>True</code> или <code>False</code>.</p>
+  <p><strong>Задание.</strong> Дана переменная <code>value = "123"</code>. Создайте:</p>
+  <ul>
+    <li><code>nothing</code> — значение None;</li>
+    <li><code>is_str</code> — проверку, является ли <code>value</code> строкой;</li>
+    <li><code>is_int</code> — проверку, является ли <code>value</code> целым числом.</li>
+  </ul>`,
+  example: `result = None\nprint(isinstance("hi", str))  # True\nprint(isinstance(5, str))     # False`,
+  starter: `value = "123"\n\n# nothing — пустое значение (None)\n# is_str  — проверка isinstance(value, str)\n# is_int  — проверка isinstance(value, int)\n`,
+  hint: 'None пишется без кавычек (иначе получится строка "None"). Проверки: is_str = isinstance(value, str) и is_int = isinstance(value, int).',
+  verify: `
+value = _need('value')
+nothing = _need('nothing', 'Создайте переменную nothing со значением None.')
+if nothing is not None:
+    raise CheckFail('nothing должно быть равно None — без кавычек (это не строка "None" и не 0).')
+is_str = _need('is_str', 'Создайте переменную is_str — результат isinstance(value, str).')
+if not isinstance(is_str, bool) or is_str is not True:
+    raise CheckFail('is_str должно быть True — результатом isinstance(value, str).')
+is_int = _need('is_int', 'Создайте переменную is_int — результат isinstance(value, int).')
+if not isinstance(is_int, bool) or is_int is not False:
+    raise CheckFail('is_int должно быть False — строка "123" не является числом int.')
+if 'isinstance(' not in _source:
+    raise CheckFail('Используйте функцию isinstance() для проверки типа, а не пишите True/False вручную.')
+`
+},
+{
+  title: '🏆 Проект: Анкета пользователя',
+  desc: `<p><strong>Финальный проект</strong> объединяет все темы курса: строки, числа, преобразование типов, bool, списки, словари и f-строки.</p>
+  <p>Вам даны «сырые» данные анкеты. Напишите программу, которая создаст:</p>
+  <ol>
+    <li><code>full_name</code> — имя и фамилию с заглавных букв через пробел: <code>"Мария Смирнова"</code>;</li>
+    <li><code>age</code> — возраст (int): <code>current_year</code> минус <code>int(birth_year)</code>;</li>
+    <li><code>is_adult</code> — True, если age &gt;= 18;</li>
+    <li><code>profile</code> — словарь с ключами <code>"name"</code>, <code>"age"</code>, <code>"hobbies"</code>;</li>
+    <li><code>hobbies_str</code> — увлечения через запятую: <code>"чтение, бег"</code>;</li>
+    <li><code>summary</code> — f-строку: <code>"Мария Смирнова, 27 лет. Увлечения: чтение, бег."</code>;</li>
+    <li>выведите <code>summary</code> через <code>print()</code>.</li>
+  </ol>
+  <p>Совет: нажимайте «Запустить», чтобы видеть промежуточный вывод и отлаживать программу по шагам.</p>`,
+  example: `# Подсказки по шагам:\nname.capitalize()      # "мария" -> "Мария"\nint("1998")            # строка -> число\n", ".join(hobbies)     # список -> "чтение, бег"\nf"{full_name}, {age} лет."  # f-строка`,
+  starter: `first_name = "мария"\nlast_name = "смирнова"\nbirth_year = "1998"\ncurrent_year = 2025\nhobbies = ["чтение", "бег"]\n\n# Финальный проект "Анкета":\n# 1. full_name   — "Мария Смирнова" (имена с заглавной буквы)\n# 2. age         — current_year минус int(birth_year)\n# 3. is_adult    — True, если age >= 18\n# 4. profile     — словарь {"name": full_name, "age": age, "hobbies": hobbies}\n# 5. hobbies_str — "чтение, бег" (через ", ".join(hobbies))\n# 6. summary     — "Мария Смирнова, 27 лет. Увлечения: чтение, бег."\n# 7. Выведите summary через print()\n`,
+  hint: 'План: capitalize() для каждого имени и склейка через " "; int(birth_year) перед вычитанием; сравнение age >= 18 для is_adult; словарь с тремя ключами; ", ".join(hobbies); f-строка с переменными в фигурных скобках.',
+  verify: `
+full_name = _need('full_name', 'Создайте переменную full_name (шаг 1 проекта).')
+if full_name != 'Мария Смирнова':
+    raise CheckFail('full_name должно быть равно "Мария Смирнова". Приведите имена к заглавной букве: first_name.capitalize() + " " + last_name.capitalize(). У вас: "' + str(full_name) + '".')
+age = _need('age', 'Создайте переменную age (шаг 2).')
+if isinstance(age, bool) or not isinstance(age, int):
+    raise CheckFail('age должно быть целым числом (int). Не забудьте преобразовать строку: int(birth_year). У вас тип: ' + _tname(age) + '.')
+if age != 27:
+    raise CheckFail('age должно равняться 27: current_year - int(birth_year). У вас: ' + str(age))
+is_adult = _need('is_adult', 'Создайте переменную is_adult (шаг 3).')
+if not isinstance(is_adult, bool) or is_adult is not True:
+    raise CheckFail('is_adult должно быть булевым значением True (проверка age >= 18).')
+profile = _need('profile', 'Создайте словарь profile (шаг 4).')
+if not isinstance(profile, dict):
+    raise CheckFail('profile должен быть словарём (dict). У вас тип: ' + _tname(profile) + '.')
+if profile.get('name') != 'Мария Смирнова':
+    raise CheckFail('В словаре profile ключ "name" должен содержать значение full_name.')
+if profile.get('age') != 27:
+    raise CheckFail('В словаре profile ключ "age" должен содержать возраст (27).')
+if profile.get('hobbies') != ['чтение', 'бег']:
+    raise CheckFail('В словаре profile ключ "hobbies" должен содержать список увлечений: ["чтение", "бег"].')
+hobbies_str = _need('hobbies_str', 'Создайте строку hobbies_str (шаг 5).')
+if hobbies_str != 'чтение, бег':
+    raise CheckFail('hobbies_str должно быть равно "чтение, бег". Используйте ", ".join(hobbies).')
+summary = _need('summary', 'Создайте строку summary (шаг 6).')
+expected = 'Мария Смирнова, 27 лет. Увлечения: чтение, бег.'
+if summary != expected:
+    raise CheckFail('summary должно быть равно: "' + expected + '". Соберите его через f-строку из full_name, age и hobbies_str. У вас: "' + str(summary) + '".')
+if summary not in _stdout:
+    raise CheckFail('Не забудьте вывести summary на экран: print(summary).')
+`
+}
+];
+
+const ERROR_RU = {
+  SyntaxError: 'Синтаксическая ошибка — Python не может разобрать код. Проверьте кавычки, скобки, запятые и двоеточия.',
+  IndentationError: 'Ошибка отступа — в Python важны пробелы в начале строки. Уберите лишние отступы или выровняйте их.',
+  TabError: 'Смешаны табы и пробелы в отступах. Используйте только пробелы.',
+  NameError: 'Неизвестное имя — переменная не создана или в названии опечатка. Python различает большие и маленькие буквы.',
+  TypeError: 'Ошибка типа — операция применена к несовместимым типам (например, строка + число). Преобразуйте тип: int(), float(), str().',
+  ValueError: 'Ошибка значения — например, невозможно превратить "abc" в число через int().',
+  ZeroDivisionError: 'Деление на ноль невозможно.',
+  KeyError: 'В словаре нет такого ключа. Проверьте его название.',
+  IndexError: 'Индекс вне диапазона — такого элемента в списке нет.',
+  EOFError: 'Функция input() не работает в тренажёре — все данные уже заданы в стартовом коде.',
+  RecursionError: 'Слишком глубокая рекурсия — вероятно, бесконечный цикл.',
+};
+
+/* ================= СОСТОЯНИЕ ================= */
+let pyodide = null;
+let loaded = false;
+let running = false;
+let captured = [];
+let currentIndex = 0;
+let started = false;
+
+const state = {
+  solved: new Set(JSON.parse(localStorage.getItem('pycamp_solved') || '[]')),
+  codes: JSON.parse(localStorage.getItem('pycamp_codes') || '{}')
+};
+function persist(){
+  localStorage.setItem('pycamp_solved', JSON.stringify([...state.solved]));
+  localStorage.setItem('pycamp_codes', JSON.stringify(state.codes));
+}
+
+const $ = id => document.getElementById(id);
+const editor = $('editor');
+const gutter = $('gutter');
+
+/* ================= ЗАГРУЗКА PYODIDE ================= */
+(async function boot(){
+  try{
+    pyodide = await loadPyodide({ indexURL: PYODIDE_URL });
+    pyodide.setStdout({ batched: (m) => captured.push(m) });
+    pyodide.setStderr({ batched: (m) => captured.push(m) });
+    await pyodide.runPythonAsync('pass');
+    loaded = true;
+    $('loadingOverlay').style.display = 'none';
+  }catch(e){
+    console.error(e);
+    $('loadingText').innerHTML = '<span class="err">Не удалось загрузить Pyodide. Проверьте подключение к интернету и обновите страницу.</span>';
+    $('retryBtn').style.display = 'inline-flex';
+    document.querySelector('.spinner').style.display = 'none';
+  }
+})();
+
+/* ================= SIDEBAR ================= */
+function buildSidebar(){
+  const list = $('taskList');
+  list.innerHTML = '';
+  TASKS.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="num">' + (state.solved.has(i) ? '✓' : (i + 1)) + '</span><span class="t"></span>';
+    li.querySelector('.t').textContent = t.title;
+    if(state.solved.has(i)) li.classList.add('solved');
+    if(i === currentIndex && started) li.classList.add('active');
+    li.addEventListener('click', () => { goTo(i); closeSidebar(); });
+    list.appendChild(li);
+  });
+}
+function updateProgress(){
+  const n = state.solved.size, total = TASKS.length, pct = Math.round(n / total * 100);
+  $('navCount').textContent = n + '/' + total;
+  $('sideCount').textContent = n;
+  $('navFill').style.width = pct + '%';
+  $('sideFill').style.width = pct + '%';
+  buildSidebar();
+}
+
+/* ================= НАВИГАЦИЯ ================= */
+function goTo(i){
+  if(i < 0 || i >= TASKS.length) return;
+  saveCurrentCode();
+  currentIndex = i;
+  renderTask();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+function saveCurrentCode(){
+  if(started) { state.codes[currentIndex] = editor.value; persist(); }
+}
+function renderTask(){
+  const t = TASKS[currentIndex];
+  $('chNum').textContent = 'Задача ' + (currentIndex + 1) + ' из ' + TASKS.length;
+  $('chTitle').textContent = t.title;
+  $('chDesc').innerHTML = t.desc;
+  $('chExample').textContent = t.example;
+  $('exampleWrap').style.display = t.example ? 'block' : 'none';
+  editor.value = (state.codes[currentIndex] !== undefined) ? state.codes[currentIndex] : t.starter;
+  $('hintBox').classList.remove('show');
+  $('hintBox').textContent = '';
+  $('result').className = 'result';
+  $('result').innerHTML = '';
+  $('consoleOut').textContent = '';
+  $('solvedBadge').classList.toggle('show', state.solved.has(currentIndex));
+  $('prevBtn').disabled = currentIndex === 0;
+  $('nextBtn').disabled = currentIndex === TASKS.length - 1;
+  updateGutter();
+  updateProgress();
+}
+function startCourse(){
+  started = true;
+  $('welcome').style.display = 'none';
+  $('challenge').style.display = 'block';
+  let first = 0;
+  for(let i = 0; i < TASKS.length; i++){ if(!state.solved.has(i)){ first = i; break; } if(i === TASKS.length-1) first = 0; }
+  currentIndex = first;
+  renderTask();
+}
+
+/* ================= РЕДАКТОР ================= */
+function updateGutter(){
+  const lines = editor.value.split('\n').length;
+  let html = '';
+  for(let i = 1; i <= lines; i++) html += '<div class="gl" data-line="' + i + '">' + i + '</div>';
+  gutter.innerHTML = html;
+}
+editor.addEventListener('input', () => { updateGutter(); saveCurrentCode(); });
+editor.addEventListener('scroll', () => { gutter.scrollTop = editor.scrollTop; });
+editor.addEventListener('keydown', e => {
+  if(e.key === 'Tab'){
+    e.preventDefault();
+    const s = editor.selectionStart, en = editor.selectionEnd;
+    editor.value = editor.value.slice(0, s) + '    ' + editor.value.slice(en);
+    editor.selectionStart = editor.selectionEnd = s + 4;
+    updateGutter();
+  }
+  if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){ e.preventDefault(); execute(true); }
+});
+
+/* ================= ВЫПОЛНЕНИЕ И ПРОВЕРКА ================= */
+function setBusy(b){
+  running = b;
+  $('runBtn').disabled = b; $('checkBtn').disabled = b;
+  $('checkBtn').textContent = b ? 'Проверяем…' : 'Проверить';
+}
+function showResult(type, html){
+  const r = $('result');
+  r.className = 'result show ' + type;
+  r.innerHTML = html;
+}
+function showConsole(){
+  $('consoleOut').textContent = captured.join('\n').replace(/\n+$/,'');
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function parseTrace(msg){
+  let line = null;
+  let m, re1 = /<exec>", line (\d+)/g;
+  while((m = re1.exec(msg)) !== null) line = parseInt(m[1]);
+  if(line === null){
+    const re2 = /line (\d+)/g;
+    while((m = re2.exec(msg)) !== null) line = parseInt(m[1]);
+  }
+  const lines = msg.split('\n').filter(l => l.trim());
+  const last = lines[lines.length - 1] || '';
+  const tm = last.match(/^([A-Za-z_][A-Za-z0-9_]*)(?::\s*([\s\S]*))?$/);
+  return { line, type: tm ? tm[1] : null, text: (tm && tm[2]) ? tm[2] : last };
+}
+function markGutterLine(n){
+  const el = gutter.querySelector('[data-line="' + n + '"]');
+  if(el) el.classList.add('err');
+}
+function renderRuntimeError(msg){
+  const p = parseTrace(msg);
+  const codeLines = editor.value.split('\n');
+  let html = '<div class="r-title">❌ Ошибка в коде' + (p.type ? ' (' + esc(p.type) + ')' : '') + '</div>';
+  if(p.line && codeLines[p.line - 1] !== undefined){
+    html += '<p><b>Строка ' + p.line + ':</b></p><div class="errline">' + p.line + ' | ' + esc(codeLines[p.line - 1]) + '</div>';
+    markGutterLine(p.line);
+    editor.classList.remove('flash-err'); void editor.offsetWidth; editor.classList.add('flash-err');
+  }
+  const ru = ERROR_RU[p.type];
+  html += '<p>' + esc(ru || p.text || msg) + '</p>';
+  if(ru && p.text) html += '<p style="color:var(--muted);font-size:.82rem">Подробности: ' + esc(p.text) + '</p>';
+  html += '<div class="r-hint">💡 <b>Подсказка:</b> ' + esc(TASKS[currentIndex].hint) + '</div>';
+  showResult('error', html);
+}
+function renderVerifyError(msg){
+  const p = parseTrace(msg);
+  if(p.type === 'CheckFail'){
+    let html = '<div class="r-title">⚠️ Пока не получилось</div>';
+    html += '<p>' + esc(p.text) + '</p>';
+    html += '<div class="r-hint">💡 <b>Подсказка:</b> ' + esc(TASKS[currentIndex].hint) + '</div>';
+    showResult('fail', html);
+  }else{
+    renderRuntimeError(msg);
+  }
+}
+
+async function execute(doCheck){
+  if(running) return;
+  if(!loaded){
+    showResult('info', '<div class="r-title">⏳ Подождите</div><p>Интерпретатор Python ещё загружается. Кнопки станут активны через несколько секунд.</p>');
+    return;
+  }
+  setBusy(true);
+  saveCurrentCode();
+  captured = [];
+  const dictCtor = pyodide.globals.get('dict');
+  const ns = dictCtor();
+  dictCtor.destroy();
+  let userError = null;
+  try{
+    await pyodide.runPythonAsync(editor.value, { globals: ns });
+  }catch(e){
+    userError = (e && e.message) ? e.message : String(e);
+  }
+  showConsole();
+  if(userError){
+    renderRuntimeError(userError);
+    ns.destroy(); setBusy(false);
+    return;
+  }
+  if(!doCheck){
+    showResult('info', '<div class="r-title">▶ Код выполнен без ошибок</div><p>Смотрите вывод программы ниже. Когда будете уверены — нажмите «Проверить».</p>');
+    ns.destroy(); setBusy(false);
+    return;
+  }
+  try{
+    ns.set('_stdout', captured.join('\n'));
+    ns.set('_source', editor.value);
+    await pyodide.runPythonAsync(PRE + TASKS[currentIndex].verify, { globals: ns });
+    const wasSolved = state.solved.has(currentIndex);
+    state.solved.add(currentIndex);
+    persist();
+    updateProgress();
+    $('solvedBadge').classList.add('show');
+    let html = '<div class="r-title">✅ Отлично! Задача решена</div><p>Все проверки пройдены.' +
+      (currentIndex < TASKS.length - 1 ? ' Переходите к следующей задаче →' : '') + '</p>';
+    showResult('ok', html);
+    if(state.solved.size === TASKS.length && !wasSolved){
+      setTimeout(() => $('modal').classList.add('show'), 900);
+    }else if(currentIndex < TASKS.length - 1){
+      const nb = $('nextBtn');
+      nb.classList.remove('btn-yellow'); nb.classList.add('btn-yellow');
+      nb.style.transform = 'scale(1.05)';
+      setTimeout(() => nb.style.transform = '', 400);
+    }
+  }catch(e){
+    renderVerifyError((e && e.message) ? e.message : String(e));
+  }
+  try{ ns.destroy(); }catch(_){}
+  setBusy(false);
+}
+
+/* ================= СОБЫТИЯ UI ================= */
+$('startBtn').addEventListener('click', startCourse);
+$('prevBtn').addEventListener('click', () => goTo(currentIndex - 1));
+$('nextBtn').addEventListener('click', () => goTo(currentIndex + 1));
+$('runBtn').addEventListener('click', () => execute(false));
+$('checkBtn').addEventListener('click', () => execute(true));
+$('resetBtn').addEventListener('click', () => {
+  if(confirm('Восстановить стартовый код? Ваши изменения в этой задаче будут потеряны.')){
+    editor.value = TASKS[currentIndex].starter;
+    updateGutter(); saveCurrentCode();
+    $('result').className = 'result'; $('consoleOut').textContent = '';
+  }
+});
+$('hintBtn').addEventListener('click', () => {
+  const hb = $('hintBox');
+  hb.textContent = '💡 ' + TASKS[currentIndex].hint;
+  hb.classList.toggle('show');
+  $('hintBtn').textContent = hb.classList.contains('show') ? '🙈 Скрыть подсказку' : '💡 Показать подсказку';
+});
+function closeSidebar(){ $('sidebar').classList.remove('open'); $('backdrop').classList.remove('show'); }
+$('menuBtn').addEventListener('click', () => {
+  $('sidebar').classList.toggle('open');
+  $('backdrop').classList.toggle('show');
+});
+$('backdrop').addEventListener('click', closeSidebar);
+function closeModal(){ $('modal').classList.remove('show'); }
+$('modal').addEventListener('click', e => { if(e.target === $('modal')) closeModal(); });
+function resetProgress(){
+  if(confirm('Удалить весь прогресс и ваши решения?')){
+    localStorage.removeItem('pycamp_solved');
+    localStorage.removeItem('pycamp_codes');
+    location.reload();
+  }
+}
+
+/* ================= СТАРТ ================= */
+if(state.solved.size > 0){
+  $('startBtn').textContent = 'Продолжить курс →';
+}
+buildSidebar();
+updateProgress();
+</script>
+</body>
+</html>

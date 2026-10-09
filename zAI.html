@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Курс — Типы данных и переменные</title>
+<style>
+/* ============ Базовые сбросы ============ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #0a0a23;
+  color: #f0f6fc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+:root {
+  --bg: #0a0a23;
+  --surface: #1b1b32;
+  --surface-2: #2a2a40;
+  --surface-3: #3b3b54;
+  --accent: #feac32;
+  --accent-hover: #feb84a;
+  --blue: #99c9ff;
+  --green: #7ee787;
+  --red: #ff7b72;
+  --text: #f0f6fc;
+  --muted: #8b949e;
+  --border: #3b3b54;
+  --code-bg: #0d1117;
+}
+code, pre, .mono { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace; }
+
+/* ============ Шапка ============ */
+header.topbar {
+  background: linear-gradient(135deg, #1b1b32 0%, #0a0a23 100%);
+  border-bottom: 2px solid var(--accent);
+  padding: 0.85rem 1.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.topbar-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.logo-badge {
+  background: var(--accent);
+  color: #0a0a23;
+  width: 38px; height: 38px;
+  border-radius: 9px;
+  display: grid; place-items: center;
+  font-weight: 900;
+  font-size: 1.3rem;
+  box-shadow: 0 2px 8px rgba(254,172,50,0.4);
+}
+.course-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.course-title { color: var(--text); font-weight: 700; }
+.progress-wrap { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; min-width: 180px; }
+.progress-text { font-size: 0.85rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.progress-bar-outer {
+  flex: 1;
+  height: 10px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+  min-width: 100px;
+}
+.progress-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #ffd479);
+  border-radius: 999px;
+  width: 0%;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 0 12px rgba(254,172,50,0.5);
+}
+
+/* ============ Основной layout ============ */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 2rem;
+}
+.intro-card {
+  background: linear-gradient(135deg, rgba(254,172,50,0.08), rgba(153,201,255,0.05));
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 14px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+}
+.intro-card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.intro-card p { color: var(--muted); line-height: 1.65; max-width: 80ch; }
+.intro-card ul { margin-top: 0.75rem; padding-left: 1.25rem; color: var(--muted); line-height: 1.8; }
+.intro-card ul li::marker { color: var(--accent); }
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+@media (max-width: 900px) {
+  .workspace { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.panel-header h2 { font-size: 1rem; font-weight: 700; }
+.task-badge {
+  background: var(--accent);
+  color: #0a0a23;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.panel-body { padding: 1.25rem; flex: 1; overflow-y: auto; }
+
+/* Описание задачи */
+.task-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.65rem; line-height: 1.3; }
+.task-desc { color: #d0d7de; line-height: 1.65; margin-bottom: 1rem; }
+.task-desc code {
+  background: var(--code-bg);
+  color: var(--blue);
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-size: 0.88em;
+  border: 1px solid var(--border);
+}
+.task-section-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+  margin: 1.1rem 0 0.5rem;
+}
+.example-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  color: #c9d1d9;
+  overflow-x: auto;
+  line-height: 1.6;
+  white-space: pre;
+}
+.example-block .kw { color: #ff7b72; }
+.example-block .str { color: #a5d6ff; }
+.example-block .num { color: #79c0ff; }
+.example-block .com { color: #6e7681; font-style: italic; }
+
+.requirements { list-style: none; padding: 0; margin-top: 0.4rem; }
+.requirements li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.35rem 0;
+  color: #d0d7de;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.requirements li::before {
+  content: "▸";
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Редактор */
+.editor-wrap {
+  display: flex;
+  background: var(--code-bg);
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  border-bottom: 1px solid var(--border);
+  min-height: 240px;
+  max-height: 360px;
+  overflow: hidden;
+}
+.line-numbers {
+  padding: 0.85rem 0.6rem 0.85rem 0.85rem;
+  text-align: right;
+  color: #6e7681;
+  user-select: none;
+  background: rgba(0,0,0,0.2);
+  border-right: 1px solid var(--border);
+  white-space: pre;
+  overflow: hidden;
+  min-width: 44px;
+}
+textarea#editor {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  color: #e6edf3;
+  padding: 0.85rem 1rem;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  tab-size: 4;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow: auto;
+  caret-color: var(--accent);
+}
+
+/* Кнопки */
+.action-bar {
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.85rem 1.25rem;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.btn {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.88rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.15rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.18s ease;
+  letter-spacing: 0.01em;
+}
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-primary {
+  background: var(--accent);
+  color: #0a0a23;
+}
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(254,172,50,0.35); }
+.btn-secondary {
+  background: var(--surface-3);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover:not(:disabled) { background: #4a4a66; }
+.btn-ghost {
+  background: transparent;
+  color: var(--blue);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover:not(:disabled) { background: rgba(153,201,255,0.1); }
+.btn-danger-ghost {
+  background: transparent;
+  color: var(--red);
+  border: 1px solid rgba(255,123,114,0.35);
+  margin-left: auto;
+}
+.btn-danger-ghost:hover:not(:disabled) { background: rgba(255,123,114,0.12); }
+
+/* Вывод */
+.output-section { padding: 1rem 1.25rem 1.25rem; }
+.output-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 0.55rem;
+}
+.output-box {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: #c9d1d9;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 60px;
+  max-height: 240px;
+  overflow-y: auto;
+  line-height: 1.55;
+}
+.output-box.empty { color: #6e7681; font-style: italic; }
+.output-box.success { border-color: rgba(126,231,135,0.5); background: rgba(126,231,135,0.06); }
+.output-box.error { border-color: rgba(255,123,114,0.5); background: rgba(255,123,114,0.06); }
+.output-box .err-line { color: var(--red); font-weight: 700; }
+.output-box .ok-line { color: var(--green); font-weight: 700; }
+.output-box .hint-line { color: var(--accent); }
+
+.result-banner {
+  display: none;
+  margin-top: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  align-items: center;
+  gap: 0.55rem;
+}
+.result-banner.show { display: flex; }
+.result-banner.success { background: rgba(126,231,135,0.12); color: var(--green); border: 1px solid rgba(126,231,135,0.4); }
+.result-banner.error { background: rgba(255,123,114,0.12); color: var(--red); border: 1px solid rgba(255,123,114,0.4); }
+
+/* Подсказки */
+.hints-box {
+  display: none;
+  margin-top: 0.85rem;
+  padding: 0.85rem 1.1rem;
+  background: rgba(254,172,50,0.08);
+  border: 1px solid rgba(254,172,50,0.35);
+  border-radius: 8px;
+}
+.hints-box.show { display: block; }
+.hints-box .hint-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); font-weight: 700; margin-bottom: 0.4rem; }
+.hints-box .hint-item { color: #d0d7de; font-size: 0.9rem; line-height: 1.55; margin-bottom: 0.35rem; padding-left: 1rem; position: relative; }
+.hints-box .hint-item::before { content: "💡"; position: absolute; left: 0; }
+
+/* Навигация */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  flex-wrap: wrap;
+}
+.task-dots {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  flex: 1;
+  min-width: 200px;
+}
+.dot {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dot:hover { background: #4a4a66; color: var(--text); }
+.dot.current { background: var(--blue); color: #0a0a23; border-color: var(--blue); box-shadow: 0 0 8px rgba(153,201,255,0.5); }
+.dot.solved { background: var(--green); color: #0a0a23; border-color: var(--green); }
+
+/* Загрузка */
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,35,0.92);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  gap: 1.25rem;
+  transition: opacity 0.4s ease;
+}
+.loader-overlay.hide { opacity: 0; pointer-events: none; }
+.spinner {
+  width: 56px; height: 56px;
+  border: 5px solid var(--surface-3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { color: var(--text); font-weight: 600; font-size: 1.05rem; }
+.loader-sub { color: var(--muted); font-size: 0.85rem; max-width: 320px; text-align: center; line-height: 1.5; }
+
+/* Footer */
+footer {
+  background: #060615;
+  border-top: 1px solid var(--border);
+  padding: 1.25rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+footer a { color: var(--blue); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  padding: 0.85rem 1.25rem;
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  z-index: 2000;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transform: translateX(120%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  max-width: 320px;
+}
+.toast.show { transform: translateX(0); }
+.toast.success { border-left-color: var(--green); }
+.toast.error { border-left-color: var(--red); }
+
+/* Модальное окно завершения */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,10,35,0.85);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+  padding: 1rem;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 2.25rem 2.5rem;
+  max-width: 460px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+}
+.modal .trophy { font-size: 3.5rem; margin-bottom: 0.5rem; }
+.modal h2 { font-size: 1.6rem; margin-bottom: 0.75rem; color: var(--accent); }
+.modal p { color: var(--muted); line-height: 1.6; margin-bottom: 1.5rem; }
+.modal .btn { width: 100%; justify-content: center; }
+
+/* Скроллбар */
+.output-box::-webkit-scrollbar, textarea#editor::-webkit-scrollbar, .panel-body::-webkit-scrollbar { width: 10px; height: 10px; }
+.output-box::-webkit-scrollbar-track, textarea#editor::-webkit-scrollbar-track, .panel-body::-webkit-scrollbar-track { background: transparent; }
+.output-box::-webkit-scrollbar-thumb, textarea#editor::-webkit-scrollbar-thumb, .panel-body::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 999px; }
+.output-box::-webkit-scrollbar-thumb:hover, textarea#editor::-webkit-scrollbar-thumb:hover { background: #4a4a66; }
+
+/* Адаптивность */
+@media (max-width: 600px) {
+  header.topbar { padding: 0.65rem 0.85rem; }
+  .topbar-inner { gap: 0.6rem; }
+  .logo { font-size: 1rem; }
+  .logo-badge { width: 32px; height: 32px; font-size: 1.1rem; }
+  .course-label { display: none; }
+  .progress-wrap { width: 100%; margin-left: 0; }
+  main { padding: 1rem 0.85rem 1.5rem; }
+  .intro-card { padding: 1.1rem 1.25rem; }
+  .intro-card h1 { font-size: 1.25rem; }
+  .panel-body { padding: 1rem; }
+  .action-bar { padding: 0.65rem 1rem; }
+  .btn { padding: 0.55rem 0.9rem; font-size: 0.82rem; }
+  .nav-bar { padding: 0.75rem 1rem; }
+  .dot { width: 26px; height: 26px; font-size: 0.7rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Шапка -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">
+      <div class="logo-badge">🐍</div>
+      <div>
+        <div class="course-label">Интерактивный курс</div>
+        <div class="course-title">Python: Типы данных и переменные</div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+      <div class="progress-text" id="progressText">0 / 25</div>
+    </div>
+  </div>
+</header>
+
+<!-- Основной контент -->
+<main>
+  <!-- Введение -->
+  <section class="intro-card" id="introCard">
+    <h1>Добро пожаловать в курс по Python!</h1>
+    <p>В этом курсе вы изучите <strong>типы данных и переменные</strong> в Python — фундамент, на котором строится всё программирование. Вы научитесь создавать переменные, работать с числами, строками и логическими значениями, преобразовывать типы и использовать их в реальных задачах.</p>
+    <ul>
+      <li>25 практических задач от простых к сложным</li>
+      <li>Python код выполняется прямо в вашем браузере через Pyodide</li>
+      <li>Подсказки при ошибках и указание строки с проблемой</li>
+      <li>Прогресс сохраняется автоматически</li>
+    </ul>
+  </section>
+
+  <!-- Рабочая область -->
+  <div class="workspace">
+    <!-- Левая панель: условие задачи -->
+    <section class="panel" aria-label="Условие задачи">
+      <div class="panel-header">
+        <h2>📝 Условие задачи</h2>
+        <span class="task-badge" id="taskBadge">Задача 1</span>
+      </div>
+      <div class="panel-body">
+        <h3 class="task-title" id="taskTitle"></h3>
+        <div class="task-desc" id="taskDesc"></div>
+        <div id="exampleContainer" style="display:none;">
+          <div class="task-section-label">Пример</div>
+          <pre class="example-block" id="exampleBlock"></pre>
+        </div>
+        <div id="requirementsContainer" style="display:none;">
+          <div class="task-section-label">Что нужно сделать</div>
+          <ul class="requirements" id="requirementsList"></ul>
+        </div>
+        <div class="hints-box" id="hintsBox">
+          <div class="hint-title">Подсказки</div>
+          <div id="hintsList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Правая панель: редактор и вывод -->
+    <section class="panel" aria-label="Редактор кода">
+      <div class="panel-header">
+        <h2>💻 Редактор кода</h2>
+        <span class="task-badge" id="editorStatus" style="background:var(--surface-3);color:var(--muted);">⏳ Загрузка Python...</span>
+      </div>
+      <div class="editor-wrap">
+        <div class="line-numbers" id="lineNumbers">1</div>
+        <textarea id="editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="# Пишите код Python здесь..." disabled></textarea>
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-primary" id="runBtn" disabled>▶ Запустить</button>
+        <button class="btn btn-secondary" id="checkBtn" disabled>✓ Проверить</button>
+        <button class="btn btn-ghost" id="hintBtn" disabled>💡 Подсказка</button>
+        <button class="btn btn-danger-ghost" id="resetBtn" disabled>↺ Сбросить</button>
+      </div>
+      <div class="output-section">
+        <div class="output-label">Вывод программы</div>
+        <div class="output-box empty" id="outputBox">Нажмите «Запустить», чтобы увидеть результат выполнения кода.</div>
+        <div class="result-banner" id="resultBanner"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Навигация -->
+  <nav class="nav-bar" aria-label="Навигация по задачам">
+    <button class="btn btn-secondary" id="prevBtn">← Предыдущая</button>
+    <div class="task-dots" id="taskDots"></div>
+    <button class="btn btn-primary" id="nextBtn">Следующая →</button>
+  </nav>
+</main>
+
+<!-- Footer -->
+<footer>
+  <p>🐍 Интерактивный курс Python · Создано с использованием <a href="https://pyodide.org/" target="_blank" rel="noopener">Pyodide</a> · Прогресс сохраняется в браузере</p>
+</footer>
+
+<!-- Загрузка Pyodide -->
+<div class="loader-overlay" id="loaderOverlay">
+  <div class="spinner"></div>
+  <div class="loader-text">Загрузка Python (Pyodide)...</div>
+  <div class="loader-sub">Первичная загрузка может занять 10–30 секунд. Python работает прямо в вашем браузере, без сервера.</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Модальное окно завершения -->
+<div class="modal-overlay" id="completionModal">
+  <div class="modal">
+    <div class="trophy">🏆</div>
+    <h2>Курс пройден!</h2>
+    <p>Поздравляем! Вы успешно решили все 25 задач и освоили типы данных и переменные в Python. Вы великолепны! 🎉</p>
+    <button class="btn btn-primary" id="modalCloseBtn">Отлично!</button>
+  </div>
+</div>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script>
+/* ============================================================
+   ДАННЫЕ КУРСА — 25 задач по теме "Типы данных и переменные"
+   ============================================================ */
+const TASKS = [
+  /* --- Раздел 1: Базовые типы данных --- */
+  {
+    title: "Целое число (int)",
+    desc: "В Python переменные создаются простым присваиванием значения. Создайте переменную с именем <code>age</code> и присвойте ей целочисленное значение <code>25</code>.",
+    example: '# Пример создания переменной:\nx = 10        # целое число\nname = "Боб"   # строка',
+    requirements: ["Переменная с именем <code>age</code> существует", "Её значение равно <code>25</code>", "Её тип — <code>int</code>"],
+    starter: "# Напишите код ниже\n",
+    checks: [{kind:"var", name:"age", value:25, type:"int"}],
+    hints: [
+      "Используйте знак равенства = для присваивания: имя = значение",
+      "Слева от = пишется имя переменной, справа — значение",
+      "Решение: age = 25"
+    ]
+  },
+  {
+    title: "Дробное число (float)",
+    desc: "Числа с плавающей точкой записываются с десятичной точкой. Создайте переменную <code>price</code> со значением <code>19.99</code>.",
+    example: 'temp = 36.6\npi = 3.14159',
+    requirements: ["Переменная <code>price</code> существует", "Значение <code>19.99</code>", "Тип — <code>float</code>"],
+    starter: "",
+    checks: [{kind:"var", name:"price", value:19.99, type:"float"}],
+    hints: [
+      "Дробные числа используют точку, а не запятую",
+      "Запишите: price = 19.99"
+    ]
+  },
+  {
+    title: "Строка (str)",
+    desc: "Строки — это текст в кавычках. Можно использовать одинарные или двойные кавычки. Создайте переменную <code>greeting</code> со строковым значением <code>Привет</code>.",
+    example: 'name = "Анна"\ncity = \'Москва\'',
+    requirements: ["Переменная <code>greeting</code> существует", 'Значение равно <code>"Привет"</code>', "Тип — <code>str</code>"],
+    starter: "",
+    checks: [{kind:"var", name:"greeting", value:"Привет", type:"str"}],
+    hints: [
+      "Текст заключается в кавычки — одинарные '...' или двойные \"...\"",
+      'Решение: greeting = "Привет"'
+    ]
+  },
+  {
+    title: "Логическое значение True",
+    desc: "Логический тип <code>bool</code> имеет два значения: <code>True</code> (истина) и <code>False</code> (ложь). Обратите внимание на заглавную букву. Создайте переменную <code>is_active</code> со значением <code>True</code>.",
+    example: 'is_admin = True\nis_empty = False',
+    requirements: ["Переменная <code>is_active</code> существует", "Значение <code>True</code>", "Тип — <code>bool</code>"],
+    starter: "",
+    checks: [{kind:"var", name:"is_active", value:true, type:"bool"}],
+    hints: [
+      "True пишется с большой буквы T, а не true",
+      "Решение: is_active = True"
+    ]
+  },
+  {
+    title: "Логическое значение False",
+    desc: "Создайте переменную <code>has_error</code> со значением <code>False</code>.",
+    example: 'is_ready = False\ndebug = True',
+    requirements: ["Переменная <code>has_error</code> существует", "Значение <code>False</code>", "Тип — <code>bool</code>"],
+    starter: "",
+    checks: [{kind:"var", name:"has_error", value:false, type:"bool"}],
+    hints: [
+      "False пишется с большой буквы F",
+      "Решение: has_error = False"
+    ]
+  },
+  {
+    title: "Специальное значение None",
+    desc: "<code>None</code> означает «ничего» или «отсутствие значения». Создайте переменную <code>result</code> со значением <code>None</code>.",
+    example: 'data = None\nprint(data)  # None',
+    requirements: ["Переменная <code>result</code> существует", "Значение равно <code>None</code>", "Тип — <code>NoneType</code>"],
+    starter: "",
+    checks: [{kind:"var", name:"result", value:null, type:"NoneType"}],
+    hints: [
+      "None пишется с большой буквы N",
+      "Решение: result = None"
+    ]
+  },
+  {
+    title: "Функция type()",
+    desc: "Функция <code>type()</code> возвращает тип объекта. Чтобы получить имя типа строкой, используйте <code>.__name__</code>. Дана переменная <code>x = 42</code>. Создайте переменную <code>x_type</code>, равную результату выражения <code>type(x).__name__</code>.",
+    example: 'x = 42\nx_type = type(x).__name__\nprint(x_type)  # int',
+    requirements: ["Переменная <code>x_type</code> существует", 'Значение равно строке <code>"int"</code>'],
+    starter: "x = 42\n",
+    checks: [{kind:"var", name:"x_type", value:"int", type:"str"}],
+    hints: [
+      "type(x) возвращает объект типа, а .__name__ даёт его имя строкой",
+      'Запишите: x_type = type(x).__name__'
+    ]
+  },
+
+  /* --- Раздел 2: Арифметические операции --- */
+  {
+    title: "Сложение чисел",
+    desc: "Даны переменные <code>a = 10</code> и <code>b = 20</code>. Создайте переменную <code>sum_result</code>, равную сумме <code>a + b</code>.",
+    example: 'a = 10\nb = 20\ntotal = a + b\nprint(total)  # 30',
+    requirements: ["Переменная <code>sum_result</code> существует", "Значение равно <code>30</code>", "Тип — <code>int</code>"],
+    starter: "a = 10\nb = 20\n",
+    checks: [{kind:"var", name:"sum_result", value:30, type:"int"}],
+    hints: [
+      "Используйте оператор + для сложения",
+      "Решение: sum_result = a + b"
+    ]
+  },
+  {
+    title: "Обычное деление /",
+    desc: "Оператор <code>/</code> всегда возвращает float. Даны <code>a = 10</code>, <code>b = 4</code>. Создайте <code>div_result</code> = <code>a / b</code>.",
+    example: '10 / 4  # 2.5 (float)\n9 / 3   # 3.0 (тоже float)',
+    requirements: ["Переменная <code>div_result</code> существует", "Значение равно <code>2.5</code>", "Тип — <code>float</code>"],
+    starter: "a = 10\nb = 4\n",
+    checks: [{kind:"var", name:"div_result", value:2.5, type:"float"}],
+    hints: [
+      "Оператор / — обычное деление, всегда возвращает дробное число",
+      "Решение: div_result = a / b"
+    ]
+  },
+  {
+    title: "Целочисленное деление //",
+    desc: "Оператор <code>//</code> возвращает целую часть от деления. Даны <code>a = 10</code>, <code>b = 3</code>. Создайте <code>int_div_result</code> = <code>a // b</code>.",
+    example: '10 // 3  # 3\n17 // 5  # 3',
+    requirements: ["Переменная <code>int_div_result</code> существует", "Значение равно <code>3</code>"],
+    starter: "a = 10\nb = 3\n",
+    checks: [{kind:"var", name:"int_div_result", value:3, type:"int"}],
+    hints: [
+      "Двойной слеш // отбрасывает дробную часть",
+      "Решение: int_div_result = a // b"
+    ]
+  },
+  {
+    title: "Остаток от деления %",
+    desc: "Оператор <code>%</code> возвращает остаток от деления. Даны <code>a = 10</code>, <code>b = 3</code>. Создайте <code>mod_result</code> = <code>a % b</code>.",
+    example: '10 % 3  # 1 (остаток)\n10 % 2  # 0 (чётное)',
+    requirements: ["Переменная <code>mod_result</code> существует", "Значение равно <code>1</code>"],
+    starter: "a = 10\nb = 3\n",
+    checks: [{kind:"var", name:"mod_result", value:1, type:"int"}],
+    hints: [
+      "Знак процента % — остаток от деления",
+      "Решение: mod_result = a % b"
+    ]
+  },
+  {
+    title: "Возведение в степень **",
+    desc: "Оператор <code>**</code> возводит число в степень. Даны <code>a = 2</code>, <code>b = 10</code>. Создайте <code>power_result</code> = <code>a ** b</code>.",
+    example: '2 ** 3   # 8\n5 ** 2   # 25',
+    requirements: ["Переменная <code>power_result</code> существует", "Значение равно <code>1024</code>"],
+    starter: "a = 2\nb = 10\n",
+    checks: [{kind:"var", name:"power_result", value:1024, type:"int"}],
+    hints: [
+      "Две звёздочки ** — возведение в степень (не ^ !)",
+      "Решение: power_result = a ** b"
+    ]
+  },
+
+  /* --- Раздел 3: Работа со строками --- */
+  {
+    title: "Конкатенация строк",
+    desc: "Строки можно складывать оператором <code>+</code>. Даны <code>first = \"Привет\"</code> и <code>last = \"Мир\"</code>. Создайте <code>full</code> = <code>first + \" \" + last</code> (с пробелом между словами).",
+    example: 'a = "При"\nb = "вет"\nprint(a + b)  # Привет',
+    requirements: ["Переменная <code>full</code> существует", 'Значение равно <code>"Привет Мир"</code>'],
+    starter: 'first = "Привет"\nlast = "Мир"\n',
+    checks: [{kind:"var", name:"full", value:"Привет Мир", type:"str"}],
+    hints: [
+      "Между словами нужен пробел — отдельная строка \" \"",
+      'Решение: full = first + " " + last'
+    ]
+  },
+  {
+    title: "Умножение строки на число",
+    desc: "Строку можно «умножить» на число — она повторится. Дана <code>s = \"А\"</code>. Создайте <code>repeated</code> = <code>s * 5</code>.",
+    example: '"-=" * 3  # "-=-="\n"А" * 4   # "АААА"',
+    requirements: ["Переменная <code>repeated</code> существует", 'Значение равно <code>"ААААА"</code>'],
+    starter: 's = "А"\n',
+    checks: [{kind:"var", name:"repeated", value:"ААААА", type:"str"}],
+    hints: [
+      "Оператор * со строкой и числом повторяет строку",
+      "Решение: repeated = s * 5"
+    ]
+  },
+
+  /* --- Раздел 4: Преобразование типов --- */
+  {
+    title: "Преобразование str в int",
+    desc: "Функция <code>int()</code> преобразует строку-число в целое. Дана <code>str_num = \"100\"</code>. Создайте <code>number</code> = <code>int(str_num)</code>.",
+    example: 'int("42")   # 42\nint("0")    # 0',
+    requirements: ["Переменная <code>number</code> существует", "Значение равно <code>100</code>", "Тип — <code>int</code>"],
+    starter: 'str_num = "100"\n',
+    checks: [{kind:"var", name:"number", value:100, type:"int"}],
+    hints: [
+      "Функция int() преобразует строку в целое число",
+      "Решение: number = int(str_num)"
+    ]
+  },
+  {
+    title: "Преобразование int в str",
+    desc: "Функция <code>str()</code> преобразует значение в строку. Дано <code>num = 42</code>. Создайте <code>text</code> = <code>str(num)</code>.",
+    example: 'str(42)   # "42"\nstr(3.14) # "3.14"',
+    requirements: ["Переменная <code>text</code> существует", 'Значение равно <code>"42"</code>', "Тип — <code>str</code>"],
+    starter: "num = 42\n",
+    checks: [{kind:"var", name:"text", value:"42", type:"str"}],
+    hints: [
+      "Функция str() превращает число в строку",
+      "Решение: text = str(num)"
+    ]
+  },
+  {
+    title: "Преобразование int в float",
+    desc: "Функция <code>float()</code> преобразует значение в дробное число. Дано <code>num = 7</code>. Создайте <code>decimal</code> = <code>float(num)</code>.",
+    example: 'float(7)   # 7.0\nfloat("3") # 3.0',
+    requirements: ["Переменная <code>decimal</code> существует", "Значение равно <code>7.0</code>", "Тип — <code>float</code>"],
+    starter: "num = 7\n",
+    checks: [{kind:"var", name:"decimal", value:7.0, type:"float"}],
+    hints: [
+      "float() превращает целое число в дробное",
+      "Решение: decimal = float(num)"
+    ]
+  },
+  {
+    title: "Преобразование числа в bool",
+    desc: "Функция <code>bool()</code> преобразует значение в логическое. Ноль — <code>False</code>, любое ненулевое число — <code>True</code>. Дано <code>num = 0</code>. Создайте <code>flag</code> = <code>bool(num)</code>.",
+    example: 'bool(0)   # False\nbool(5)   # True\nbool("")  # False (пустая строка)',
+    requirements: ["Переменная <code>flag</code> существует", "Значение равно <code>False</code>", "Тип — <code>bool</code>"],
+    starter: "num = 0\n",
+    checks: [{kind:"var", name:"flag", value:false, type:"bool"}],
+    hints: [
+      "bool(0) даёт False, так как 0 — это «ложь» в Python",
+      "Решение: flag = bool(num)"
+    ]
+  },
+
+  /* --- Раздел 5: Строковые операции --- */
+  {
+    title: "F-строки (форматирование)",
+    desc: "F-строки позволяют вставлять переменные прямо в текст. Поставьте букву <code>f</code> перед строкой и используйте фигурные скобки <code>{}</code>. Даны <code>name = \"Анна\"</code>, <code>age = 25</code>. Создайте <code>info</code> = <code>f\"{name} мне {age} лет\"</code>.",
+    example: 'name = "Боб"\nage = 30\ns = f"{name} {age} лет"\n# "Боб 30 лет"',
+    requirements: ["Переменная <code>info</code> существует", 'Значение равно <code>"Анна мне 25 лет"</code>'],
+    starter: 'name = "Анна"\nage = 25\n',
+    checks: [{kind:"var", name:"info", value:"Анна мне 25 лет", type:"str"}],
+    hints: [
+      "Поставьте f перед строкой и оберните переменные в {}",
+      'Решение: info = f"{name} мне {age} лет"'
+    ]
+  },
+  {
+    title: "Длина строки len()",
+    desc: "Функция <code>len()</code> возвращает количество символов в строке. Дана <code>s = \"Hello\"</code>. Создайте <code>length</code> = <code>len(s)</code>.",
+    example: 'len("Hello")  # 5\nlen("")       # 0',
+    requirements: ["Переменная <code>length</code> существует", "Значение равно <code>5</code>", "Тип — <code>int</code>"],
+    starter: 's = "Hello"\n',
+    checks: [{kind:"var", name:"length", value:5, type:"int"}],
+    hints: [
+      "Функция len() возвращает длину строки",
+      "Решение: length = len(s)"
+    ]
+  },
+  {
+    title: "Индексация строки",
+    desc: "К символам строки можно обращаться по индексу, начиная с <code>0</code>. Дана <code>s = \"Python\"</code>. Создайте <code>first_char</code> = <code>s[0]</code>.",
+    example: 's = "Python"\ns[0]  # "P"\ns[1]  # "y"\ns[-1] # "n" (последний)',
+    requirements: ["Переменная <code>first_char</code> существует", 'Значение равно <code>"P"</code>'],
+    starter: 's = "Python"\n',
+    checks: [{kind:"var", name:"first_char", value:"P", type:"str"}],
+    hints: [
+      "Индексация в Python начинается с 0, не с 1",
+      "Решение: first_char = s[0]"
+    ]
+  },
+  {
+    title: "Срез строки",
+    desc: "Срез <code>s[start:end]</code> возвращает часть строки от <code>start</code> до <code>end</code> (не включая <code>end</code>). Дана <code>s = \"Hello World\"</code>. Создайте <code>word</code> = <code>s[0:5]</code>.",
+    example: 's = "Hello World"\ns[0:5]   # "Hello"\ns[6:]    # "World"\ns[:5]    # "Hello"',
+    requirements: ["Переменная <code>word</code> существует", 'Значение равно <code>"Hello"</code>'],
+    starter: 's = "Hello World"\n',
+    checks: [{kind:"var", name:"word", value:"Hello", type:"str"}],
+    hints: [
+      "Срез [0:5] берёт символы с индексами 0,1,2,3,4",
+      "Решение: word = s[0:5]"
+    ]
+  },
+
+  /* --- Раздел 6: Дополнительные концепции --- */
+  {
+    title: "Множественное присваивание",
+    desc: "В Python можно присвоить значения нескольким переменным в одной строке. Создайте переменные <code>x</code>, <code>y</code>, <code>z</code> со значениями <code>1</code>, <code>2</code>, <code>3</code> соответственно — одной строкой.",
+    example: 'a, b, c = 1, 2, 3\nprint(a, b, c)  # 1 2 3',
+    requirements: ["<code>x = 1</code>", "<code>y = 2</code>", "<code>z = 3</code>", "Все три созданы одной строкой"],
+    starter: "",
+    checks: [
+      {kind:"var", name:"x", value:1, type:"int"},
+      {kind:"var", name:"y", value:2, type:"int"},
+      {kind:"var", name:"z", value:3, type:"int"}
+    ],
+    hints: [
+      "Формат: имя1, имя2, имя3 = знач1, знач2, знач3",
+      "Решение: x, y, z = 1, 2, 3"
+    ]
+  },
+  {
+    title: "Обмен значениями",
+    desc: "Множественное присваивание позволяет менять значения переменных местами без третьей переменной. Даны <code>a = 5</code>, <code>b = 10</code>. Поменяйте их значения местами так, чтобы <code>a</code> стало <code>10</code>, а <code>b</code> — <code>5</code>. Используйте одну строку.",
+    example: 'a, b = b, a  # обмен значений',
+    requirements: ["После обмена <code>a == 10</code>", "После обмена <code>b == 5</code>"],
+    starter: "a = 5\nb = 10\n",
+    checks: [
+      {kind:"var", name:"a", value:10, type:"int"},
+      {kind:"var", name:"b", value:5, type:"int"}
+    ],
+    hints: [
+      "Запишите a, b = b, a — Python вычислит правую часть сначала",
+      "Решение: a, b = b, a"
+    ]
+  },
+
+  /* --- Раздел 7: Финальный проект --- */
+  {
+    title: "🏆 Финальный проект: Карточка пользователя",
+    desc: "Соберите всё вместе! Создайте переменные: <code>name = \"Иван\"</code>, <code>age = 30</code>, <code>height = 1.8</code>, <code>is_admin = True</code>. Затем создайте строку <code>profile</code> с помощью f-строки в точности таком формате: <code>\"Имя: Иван, Возраст: 30, Рост: 1.8, Администратор: True\"</code>.",
+    example: '# Подсказка по f-строке:\nf"Имя: {name}, Возраст: {age}"\n# Булевы значения подставляются автоматически',
+    requirements: ["Существуют переменные <code>name</code>, <code>age</code>, <code>height</code>, <code>is_admin</code>", 'Переменная <code>profile</code> содержит строку точно в заданном формате'],
+    starter: "# Создайте переменные и соберите profile\n",
+    checks: [
+      {kind:"var", name:"name", value:"Иван", type:"str"},
+      {kind:"var", name:"age", value:30, type:"int"},
+      {kind:"var", name:"height", value:1.8, type:"float"},
+      {kind:"var", name:"is_admin", value:true, type:"bool"},
+      {kind:"var", name:"profile", value:"Имя: Иван, Возраст: 30, Рост: 1.8, Администратор: True", type:"str"}
+    ],
+    hints: [
+      "Сначала создайте все 4 переменные: name, age, height, is_admin",
+      "Затем используйте f-строку: f\"Имя: {name}, Возраст: {age}, Рост: {height}, Администратор: {is_admin}\"",
+      "Полное решение:\nname = \"Иван\"\nage = 30\nheight = 1.8\nis_admin = True\nprofile = f\"Имя: {name}, Возраст: {age}, Рост: {height}, Администратор: {is_admin}\""
+    ]
+  }
+];
+
+/* ============================================================
+   СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+   ============================================================ */
+let pyodide = null;
+let currentTask = 0;
+let solved = new Array(TASKS.length).fill(false);
+let userCode = new Array(TASKS.length).fill(null);
+let hintLevel = new Array(TASKS.length).fill(0); // сколько подсказок показано
+let isReady = false;
+
+/* ============================================================
+   DOM ссылки
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const editor = $("editor");
+const lineNumbers = $("lineNumbers");
+const runBtn = $("runBtn");
+const checkBtn = $("checkBtn");
+const hintBtn = $("hintBtn");
+const resetBtn = $("resetBtn");
+const prevBtn = $("prevBtn");
+const nextBtn = $("nextBtn");
+const outputBox = $("outputBox");
+const resultBanner = $("resultBanner");
+const hintsBox = $("hintsBox");
+const hintsList = $("hintsList");
+const taskDots = $("taskDots");
+const progressBar = $("progressBar");
+const progressText = $("progressText");
+const loaderOverlay = $("loaderOverlay");
+const editorStatus = $("editorStatus");
+const toast = $("toast");
+const completionModal = $("completionModal");
+
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ PYODIDE
+   ============================================================ */
+async function initPyodide() {
+  try {
+    pyodide = await loadPyodide();
+    // настроим вывод
+    isReady = true;
+    loaderOverlay.classList.add("hide");
+    editor.disabled = false;
+    runBtn.disabled = false;
+    checkBtn.disabled = false;
+    hintBtn.disabled = false;
+    resetBtn.disabled = false;
+    editorStatus.textContent = "✓ Python готов";
+    editorStatus.style.background = "var(--green)";
+    editorStatus.style.color = "#0a0a23";
+    loadProgress();
+    renderTask();
+  } catch (e) {
+    loaderOverlay.querySelector(".loader-text").textContent = "Ошибка загрузки Python";
+    loaderOverlay.querySelector(".loader-sub").textContent = "Проверьте интернет-соединение и обновите страницу. " + e.message;
+  }
+}
+
+/* ============================================================
+   СОХРАНЕНИЕ И ЗАГРУЗКА ПРОГРЕССА
+   ============================================================ */
+function saveProgress() {
+  try {
+    localStorage.setItem("pycourse_solved", JSON.stringify(solved));
+    localStorage.setItem("pycourse_code", JSON.stringify(userCode));
+    localStorage.setItem("pycourse_current", String(currentTask));
+  } catch(e) {}
+}
+function loadProgress() {
+  try {
+    const sv = localStorage.getItem("pycourse_solved");
+    const cd = localStorage.getItem("pycourse_code");
+    const ct = localStorage.getItem("pycourse_current");
+    if (sv) solved = JSON.parse(sv);
+    if (cd) userCode = JSON.parse(cd);
+    if (ct !== null) {
+      const n = parseInt(ct, 10);
+      if (!isNaN(n) && n >= 0 && n < TASKS.length) currentTask = n;
+    }
+  } catch(e) {}
+}
+
+/* ============================================================
+   РЕНДЕРИНГ ЗАДАЧИ
+   ============================================================ */
+function renderTask() {
+  const task = TASKS[currentTask];
+  $("taskBadge").textContent = `Задача ${currentTask + 1} / ${TASKS.length}`;
+  $("taskTitle").textContent = task.title;
+  $("taskDesc").innerHTML = task.desc;
+
+  // пример
+  if (task.example) {
+    $("exampleContainer").style.display = "block";
+    $("exampleBlock").innerHTML = colorize(task.example);
+  } else {
+    $("exampleContainer").style.display = "none";
+  }
+
+  // требования
+  if (task.requirements && task.requirements.length) {
+    $("requirementsContainer").style.display = "block";
+    $("requirementsList").innerHTML = task.requirements.map(r => `<li>${r}</li>`).join("");
+  } else {
+    $("requirementsContainer").style.display = "none";
+  }
+
+  // редактор: загрузить сохранённый код или стартер
+  const saved = userCode[currentTask];
+  editor.value = (saved !== null && saved !== undefined) ? saved : task.starter;
+  updateLineNumbers();
+
+  // сбросить вывод
+  outputBox.textContent = "Нажмите «Запустить», чтобы увидеть результат выполнения кода.";
+  outputBox.className = "output-box empty";
+  resultBanner.className = "result-banner";
+  resultBanner.textContent = "";
+
+  // подсказки
+  hintLevel[currentTask] = hintLevel[currentTask] || 0;
+  renderHints();
+
+  // кнопки навигации
+  prevBtn.disabled = currentTask === 0;
+  nextBtn.disabled = currentTask === TASKS.length - 1;
+  if (currentTask === TASKS.length - 1) {
+    nextBtn.textContent = "🏁 Финал";
+  } else {
+    nextBtn.textContent = "Следующая →";
+  }
+
+  // точки
+  renderDots();
+  updateProgress();
+  saveProgress();
+  editor.focus();
+}
+
+function renderHints() {
+  const task = TASKS[currentTask];
+  const level = hintLevel[currentTask];
+  if (level > 0 && task.hints) {
+    const shown = task.hints.slice(0, level);
+    hintsList.innerHTML = shown.map(h => `<div class="hint-item">${h}</div>`).join("");
+    hintsBox.classList.add("show");
+  } else {
+    hintsBox.classList.remove("show");
+    hintsList.innerHTML = "";
+  }
+}
+
+function renderDots() {
+  taskDots.innerHTML = TASKS.map((_, i) => {
+    let cls = "dot";
+    if (i === currentTask) cls += " current";
+    if (solved[i]) cls += " solved";
+    return `<div class="${cls}" data-idx="${i}" title="Задача ${i+1}">${i+1}</div>`;
+  }).join("");
+  taskDots.querySelectorAll(".dot").forEach(d => {
+    d.addEventListener("click", () => {
+      currentTask = parseInt(d.dataset.idx, 10);
+      renderTask();
+    });
+  });
+}
+
+function updateProgress() {
+  const count = solved.filter(Boolean).length;
+  const pct = (count / TASKS.length) * 100;
+  progressBar.style.width = pct + "%";
+  progressText.textContent = `${count} / ${TASKS.length}`;
+}
+
+/* ============================================================
+   РЕДАКТОР: номера строк и Tab
+   ============================================================ */
+function updateLineNumbers() {
+  const lines = editor.value.split("\n").length;
+  let html = "";
+  for (let i = 1; i <= lines; i++) html += i + "\n";
+  lineNumbers.textContent = html;
+}
+editor.addEventListener("input", () => {
+  updateLineNumbers();
+  userCode[currentTask] = editor.value;
+  saveProgress();
+});
+editor.addEventListener("scroll", () => {
+  lineNumbers.scrollTop = editor.scrollTop;
+});
+editor.addEventListener("keydown", e => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const s = editor.selectionStart, en = editor.selectionEnd;
+    editor.value = editor.value.substring(0, s) + "    " + editor.value.substring(en);
+    editor.selectionStart = editor.selectionEnd = s + 4;
+    updateLineNumbers();
+    userCode[currentTask] = editor.value;
+    saveProgress();
+  }
+});
+
+/* ============================================================
+   ВЫПОЛНЕНИЕ КОДА
+   ============================================================ */
+let stdoutBuf = "";
+let stderrBuf = "";
+
+function setupStreams() {
+  pyodide.setStdout({ batched: s => { stdoutBuf += s; } });
+  pyodide.setStderr({ batched: s => { stderrBuf += s; } });
+}
+
+function resetStreams() {
+  stdoutBuf = "";
+  stderrBuf = "";
+}
+
+async function runCode(code) {
+  resetStreams();
+  setupStreams();
+  // очищаем globals от предыдущих запусков, кроме встроенных
+  try {
+    pyodide.runPython("import builtins\n_globals = vars(builtins).copy()\n_globals.update({'__name__':'__main__','__builtins__':__builtins__})");
+  } catch(e) {}
+  let result = { stdout: "", stderr: "", error: null, errorLine: null, errorType: null };
+  try {
+    // Выполняем код пользователя в чистом пространстве
+    pyodide.runPython(`
+import sys, io, builtins
+_user_ns = {'__name__':'__main__','__builtins__':builtins}
+exec(${JSON.stringify(code)}, _user_ns)
+# копируем переменные в globals, чтобы проверки могли их увидеть
+for _k in list(_user_ns.keys()):
+    if _k not in ('__name__','__builtins__'):
+        globals()[_k] = _user_ns[_k]
+`);
+  } catch (err) {
+    result.error = err;
+    const parsed = parseError(err);
+    result.errorLine = parsed.line;
+    result.errorType = parsed.type;
+    result.errorMsg = parsed.msg;
+    result.traceback = parsed.traceback;
+  }
+  result.stdout = stdoutBuf;
+  result.stderr = stderrBuf;
+  return result;
+}
+
+/* ============================================================
+   ПАРСИНГ ОШИБОК PYTHON
+   ============================================================ */
+function parseError(err) {
+  const raw = err.message || String(err);
+  const result = { line: null, type: null, msg: null, traceback: raw };
+
+  // Ищем строку вида: File "<exec>", line N, in <module>
+  const lineMatch = raw.match(/line\s+(\d+)/g);
+  if (lineMatch) {
+    const nums = lineMatch.map(m => parseInt(m.match(/\d+/)[0], 10));
+    result.line = nums[nums.length - 1]; // последняя строка = место ошибки
+  }
+
+  // Тип ошибки: последняя непустая строка вида "NameError: ..."
+  const lines = raw.trim().split("\n").filter(l => l.trim());
+  if (lines.length) {
+    const last = lines[lines.length - 1];
+    const m = last.match(/^([A-Za-z_]+Error):\s*(.*)/);
+    if (m) {
+      result.type = m[1];
+      result.msg = m[2];
+    } else {
+      // SyntaxError иногда на одной строке
+      const sm = last.match(/^(SyntaxError):(.*)/);
+      if (sm) { result.type = sm[1]; result.msg = sm[2].trim(); }
+      else { result.msg = last; }
+    }
+  }
+  return result;
+}
+
+/* ============================================================
+   ПРОВЕРКА ЗАДАЧИ
+   ============================================================ */
+function jsValToPy(v) {
+  if (v === null) return "None";
+  if (v === true) return "True";
+  if (v === false) return "False";
+  if (typeof v === "string") return JSON.stringify(v);
+  return String(v);
+}
+
+function checkTask(runResult) {
+  const task = TASKS[currentTask];
+  const failed = [];
+  let firstError = null;
+
+  for (const check of task.checks) {
+    if (check.kind === "var") {
+      // существует ли переменная
+      const existsScript = `'${check.name}' in globals()`;
+      let exists = false;
+      try {
+        exists = pyodide.runPython(existsScript);
+      } catch(e) { exists = false; }
+
+      if (!exists) {
+        failed.push({ check, reason: `Переменная <code>${check.name}</code> не создана` });
+        if (!firstError) firstError = `Переменная «${check.name}» не найдена. Убедитесь, что вы её создали.`;
+        continue;
+      }
+
+      // тип
+      if (check.type) {
+        let actualType = null;
+        try {
+          actualType = pyodide.runPython(`type(globals()['${check.name}']).__name__`);
+        } catch(e) {}
+        if (actualType !== check.type) {
+          failed.push({ check, reason: `Переменная <code>${check.name}</code>: ожидался тип <code>${check.type}</code>, получен <code>${actualType}</code>` });
+          if (!firstError) firstError = `У переменной «${check.name}» неверный тип: ${actualType}, а должно быть ${check.type}.`;
+          continue;
+        }
+      }
+
+      // значение
+      if (check.value !== undefined) {
+        let actualVal = undefined;
+        try {
+          const v = pyodide.runPython(`globals()['${check.name}']`);
+          actualVal = pyToJs(v);
+        } catch(e) {}
+        const expected = check.value;
+        if (!valuesEqual(actualVal, expected)) {
+          failed.push({ check, reason: `Переменная <code>${check.name}</code>: ожидалось <code>${fmtVal(expected)}</code>, получено <code>${fmtVal(actualVal)}</code>` });
+          if (!firstError) firstError = `У переменной «${check.name}» неверное значение: ${fmtVal(actualVal)}, а должно быть ${fmtVal(expected)}.`;
+          continue;
+        }
+      }
+    }
+  }
+
+  return { passed: failed.length === 0, failed, firstError };
+}
+
+function pyToJs(v) {
+  // Pyodide возвращает прокси; приводим к простым JS значениям
+  if (v === undefined || v === null) return v;
+  if (typeof v === "number" || typeof v === "boolean" || typeof v === "string") return v;
+  if (v && typeof v === "object" && "toString" in v) {
+    const s = String(v);
+    if (s === "True") return true;
+    if (s === "False") return false;
+    if (s === "None") return null;
+    // число?
+    if (!isNaN(Number(s))) return Number(s);
+    return s;
+  }
+  return v;
+}
+
+function valuesEqual(a, b) {
+  if (a === b) return true;
+  // сравнение чисел с допуском
+  if (typeof a === "number" && typeof b === "number") {
+    return Math.abs(a - b) < 1e-9;
+  }
+  // bool vs number
+  if (typeof a === "boolean" || typeof b === "boolean") {
+    return a === b;
+  }
+  return String(a) === String(b);
+}
+
+function fmtVal(v) {
+  if (v === null) return "None";
+  if (v === true) return "True";
+  if (v === false) return "False";
+  if (typeof v === "string") return `"${v}"`;
+  return String(v);
+}
+
+/* ============================================================
+   ОБРАБОТКА КНОПОК
+   ============================================================ */
+async function onRun() {
+  if (!isReady) return showToast("Python ещё загружается...", "error");
+  setBusy(true);
+  outputBox.textContent = "Выполнение...";
+  outputBox.className = "output-box";
+  resultBanner.className = "result-banner";
+
+  const code = editor.value;
+  userCode[currentTask] = code;
+  saveProgress();
+
+  const result = await runCode(code);
+  displayRunResult(result, false);
+  setBusy(false);
+}
+
+async function onCheck() {
+  if (!isReady) return showToast("Python ещё загружается...", "error");
+  setBusy(true);
+  outputBox.textContent = "Проверка...";
+  outputBox.className = "output-box";
+  resultBanner.className = "result-banner";
+
+  const code = editor.value;
+  userCode[currentTask] = code;
+  saveProgress();
+
+  const result = await runCode(code);
+  // сначала покажем вывод
+  displayRunResult(result, true);
+
+  if (result.error) {
+    // ошибка выполнения — не проверяем переменные
+    resultBanner.className = "result-banner error show";
+    resultBanner.innerHTML = `❌ В коде есть ошибка${result.errorLine ? ` (строка ${result.errorLine})` : ""}. Исправьте её и попробуйте снова.`;
+    // авто-подсказка
+    maybeAutoHint();
+    setBusy(false);
+    return;
+  }
+
+  // проверка условий
+  const checkRes = checkTask(result);
+  if (checkRes.passed) {
+    if (!solved[currentTask]) {
+      solved[currentTask] = true;
+      saveProgress();
+    }
+    resultBanner.className = "result-banner success show";
+    resultBanner.innerHTML = `✅ Задача решена правильно! Отличная работа! 🎉`;
+    renderDots();
+    updateProgress();
+    showToast("Задача решена! ✅", "success");
+    // если это последняя и все решены — показать модалку
+    if (solved.every(Boolean)) {
+      setTimeout(() => completionModal.classList.add("show"), 700);
+    }
+  } else {
+    resultBanner.className = "result-banner error show";
+    const reasons = checkRes.failed.map(f => "• " + f.reason).join("<br>");
+    resultBanner.innerHTML = `❌ Почти получилось, но есть недочёты:<br>${reasons}<br><span style="font-size:0.85em;opacity:0.85">Нажмите «💡 Подсказка», если застряли.</span>`;
+    maybeAutoHint();
+  }
+  setBusy(false);
+}
+
+function displayRunResult(result, isCheck) {
+  let html = "";
+  if (result.stdout) {
+    html += escapeHtml(result.stdout);
+  }
+  if (result.error) {
+    // формируем понятный вывод ошибки
+    const tb = result.traceback || "";
+    html += formatErrorOutput(result);
+  }
+  if (!result.stdout && !result.error) {
+    html += "(программа выполнилась без вывода в консоль)\n";
+    if (isCheck) {
+      // при проверке без вывода, но без ошибок — продолжим к проверке переменных
+    }
+  }
+  outputBox.innerHTML = html || "(нет вывода)";
+  outputBox.className = "output-box" + (result.error ? " error" : "");
+}
+
+function formatErrorOutput(result) {
+  let out = "";
+  const line = result.errorLine;
+  const type = result.errorType;
+  const msg = result.errorMsg;
+  out += `<span class="err-line">🚫 Ошибка${line ? ` в строке ${line}` : ""}:${type ? ` ${type}: ${msg}` : ` ${msg || ""}`}</span>\n`;
+  // подсказка по типу ошибки
+  if (type === "NameError") {
+    out += `<span class="hint-line">💡 Переменная или имя не определены. Проверьте правильность имени.</span>\n`;
+  } else if (type === "SyntaxError") {
+    out += `<span class="hint-line">💡 Синтаксическая ошибка — проверьте кавычки, скобки, двоеточия и отступы.</span>\n`;
+  } else if (type === "TypeError") {
+    out += `<span class="hint-line">💡 Несовместимые типы для операции. Возможно, складываете строку с числом.</span>\n`;
+  } else if (type === "ValueError") {
+    out += `<span class="hint-line">💡 Неверное значение для операции (например, int() от нечисловой строки).</span>\n`;
+  } else if (type === "IndentationError") {
+    out += `<span class="hint-line">💡 Проблема с отступами — в Python они важны. Используйте 4 пробела.</span>\n`;
+  } else if (type === "ZeroDivisionError") {
+    out += `<span class="hint-line">💡 Деление на ноль невозможно.</span>\n`;
+  } else if (type === "IndexError") {
+    out += `<span class="hint-line">💡 Индекс выходит за границы строки/списка.</span>\n`;
+  }
+  if (line) {
+    // покажем строку с ошибкой
+    const codeLines = editor.value.split("\n");
+    if (line >= 1 && line <= codeLines.length) {
+      out += `\n<span class="err-line">→ Строка ${line}:</span>\n  ${escapeHtml(codeLines[line-1])}\n`;
+    }
+  }
+  return out;
+}
+
+function maybeAutoHint() {
+  // автоматически показываем первую подсказку при ошибке
+  if (hintLevel[currentTask] === 0) {
+    hintLevel[currentTask] = 1;
+    renderHints();
+  }
+}
+
+function onHint() {
+  const task = TASKS[currentTask];
+  if (!task.hints) return;
+  if (hintLevel[currentTask] < task.hints.length) {
+    hintLevel[currentTask]++;
+    renderHints();
+    showToast(`Подсказка ${hintLevel[currentTask]} из ${task.hints.length}`, "success");
+  } else {
+    showToast("Все подсказки уже показаны", "error");
+  }
+}
+
+function onReset() {
+  const task = TASKS[currentTask];
+  editor.value = task.starter || "";
+  userCode[currentTask] = editor.value;
+  hintLevel[currentTask] = 0;
+  updateLineNumbers();
+  renderHints();
+  outputBox.textContent = "Нажмите «Запустить», чтобы увидеть результат выполнения кода.";
+  outputBox.className = "output-box empty";
+  resultBanner.className = "result-banner";
+  saveProgress();
+  showToast("Код сброшен", "success");
+}
+
+function onPrev() {
+  if (currentTask > 0) {
+    currentTask--;
+    renderTask();
+  }
+}
+function onNext() {
+  if (currentTask < TASKS.length - 1) {
+    currentTask++;
+    renderTask();
+  }
+}
+
+function setBusy(busy) {
+  runBtn.disabled = busy;
+  checkBtn.disabled = busy;
+  prevBtn.disabled = busy || currentTask === 0;
+  nextBtn.disabled = busy || currentTask === TASKS.length - 1;
+  if (busy) {
+    runBtn.textContent = "⏳ Выполняется...";
+  } else {
+    runBtn.textContent = "▶ Запустить";
+  }
+}
+
+/* ============================================================
+   УТИЛИТЫ
+   ============================================================ */
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function colorize(code) {
+  // простая подсветка для примеров
+  let html = escapeHtml(code);
+  // комментарии
+  html = html.replace(/(#[^\n]*)/g, '<span class="com">$1</span>');
+  // строки
+  html = html.replace(/(&quot;[^&]*?&quot;|&#39;[^&]*?&#39;)/g, '<span class="str">$1</span>');
+  // ключевые слова
+  html = html.replace(/\b(True|False|None|print|len|int|str|float|bool|type|input|and|or|not|in|if|else|elif|for|while|def|return|import|from|as|class)\b/g, '<span class="kw">$1</span>');
+  // числа
+  html = html.replace(/\b(\d+\.?\d*)\b/g, '<span class="num">$1</span>');
+  return html;
+}
+
+function showToast(msg, type) {
+  toast.textContent = msg;
+  toast.className = "toast " + (type || "");
+  toast.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove("show"), 2800);
+}
+
+/* ============================================================
+   ПРИВЯЗКА СОБЫТИЙ
+   ============================================================ */
+runBtn.addEventListener("click", onRun);
+checkBtn.addEventListener("click", onCheck);
+hintBtn.addEventListener("click", onHint);
+resetBtn.addEventListener("click", onReset);
+prevBtn.addEventListener("click", onPrev);
+nextBtn.addEventListener("click", onNext);
+$("modalCloseBtn").addEventListener("click", () => completionModal.classList.remove("show"));
+
+// Ctrl+Enter — запуск проверки
+editor.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    e.preventDefault();
+    onCheck();
+  }
+});
+
+/* ============================================================
+   ЗАПУСК
+   ============================================================ */
+window.addEventListener("load", initPyodide);
+</script>
+</body>
+</html>
