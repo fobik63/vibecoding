@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивный курс Python: Типы данных и переменные</title>
+    <style>
+        :root {
+            --primary: #0066cc;
+            --success: #28a745;
+            --danger: #dc3545;
+            --bg: #f8f9fa;
+            --text: #212529;
+            --border: #dee2e6;
+            --card-bg: #ffffff;
+            --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: var(--font);
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        header {
+            background-color: #fff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            flex-grow: 1;
+            max-width: 400px;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .intro {
+            background-color: #fff;
+            padding: 2rem;
+            margin: 1rem auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            max-width: 1200px;
+        }
+        .task-container {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem auto;
+            max-width: 1200px;
+            flex-wrap: wrap;
+        }
+        .task-nav {
+            flex: 0 0 200px;
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .task-nav button {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            background-color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .task-nav button:hover {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .task-nav button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .task-content {
+            flex: 1;
+            min-width: 300px;
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .task-header {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+        .task-title {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+        .task-description {
+            color: #495057;
+        }
+        .example-code {
+            background-color: #f1f3f5;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #495057;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary);
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            resize: vertical;
+            background-color: #f8f9fa;
+        }
+        .controls {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-check {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .btn-check:hover {
+            background-color: #0052a3;
+        }
+        .output-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            min-height: 60px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .output-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .output-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .hint {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+        .final-project {
+            background-color: #e7f1ff;
+            border: 2px dashed var(--primary);
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .task-container {
+                flex-direction: column;
+            }
+            .task-nav {
+                flex: 1 1 100%;
+            }
+            .task-content {
+                flex: 1 1 100%;
+            }
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container header-content">
+        <div>
+            <h1>🐍 Курс: Типы данных и переменные в Python</h1>
+            <p style="margin: 0.2rem 0 0 0; color: #6c757d;">От чисел и строк до списков и словарей</p>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="intro">
+        <h2>Добро пожаловать!</h2>
+        <p>В этом курсе вы научитесь работать с основными кирпичиками любого языка программирования. Мы пройдем путь от простых чисел до сложных структур данных. Весь код выполняется прямо в вашем браузере — ничего устанавливать не нужно.</p>
+        <p><strong>Как работать:</strong> Читайте условие, пишите код в поле ниже и нажимайте "Проверить". Если ошиблись — система подскажет, в какой строке проблема и что нужно исправить.</p>
+    </div>
+
+    <div class="task-container">
+        <div class="task-nav">
+            <div id="taskList"></div>
+            <div style="margin-top: auto;">
+                <button id="prevBtn">◀ Предыдущая</button>
+                <button id="nextBtn">Следующая ▶</button>
+            </div>
+        </div>
+
+        <div class="task-content">
+            <div id="taskArea"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    // --- ДАННЫЕ КУРСА ---
+    const tasks = [
+        {
+            id: 1,
+            title: "Привет, мир!",
+            description: "Выведите на экран строку 'Привет, Python!' с помощью функции print().",
+            example: "print('Привет, Python!')",
+            solution: "print('Привет, Python!')",
+            hint: "Используйте функцию print() и передайте ей строку в одинарных или двойных кавычках."
+        },
+        {
+            id: 2,
+            title: "Целые числа",
+            description: "Создайте переменную age и присвойте ей ваш возраст (целое число). Выведите значение переменной.",
+            example: "age = 25\nprint(age)",
+            solution: "age = 25\nprint(age)",
+            hint: "Для целых чисел не нужны кавычки. Используйте знак = для присваивания."
+        },
+        {
+            id: 3,
+            title: "Числа с плавающей точкой",
+            description: "Создайте переменную price и присвойте ей цену 99.99. Выведите её на экран.",
+            example: "price = 99.99\nprint(price)",
+            solution: "price = 99.99\nprint(price)",
+            hint: "Дробные числа пишутся через точку."
+        },
+        {
+            id: 4,
+            title: "Строки",
+            description: "Создайте переменную name со своим именем. Выведите фразу 'Меня зовут [имя]'.",
+            example: "name = 'Алексей'\nprint('Меня зовут ' + name)",
+            solution: "name = 'Алексей'\nprint('Меня зовут ' + name)",
+            hint: "Чтобы соединить строку и переменную, используйте оператор +."
+        },
+        {
+            id: 5,
+            title: "Арифметика",
+            description: "Создайте переменную a = 10 и b = 3. Выведите результат их сложения, вычитания и умножения.",
+            example: "a = 10\nb = 3\nprint(a + b)\nprint(a - b)\nprint(a * b)",
+            solution: "a = 10\nb = 3\nprint(a + b)\nprint(a - b)\nprint(a * b)",
+            hint: "Операторы: + (сложение), - (вычитание), * (умножение)."
+        },
+        {
+            id: 6,
+            title: "Деление",
+            description: "Разделите число 10 на 4 и выведите результат. Помните, что обычное деление (/) всегда дает дробное число.",
+            example: "print(10 / 4)",
+            solution: "print(10 / 4)",
+            hint: "Используйте символ /."
+        },
+        {
+            id: 7,
+            title: "Целочисленное деление",
+            description: "Разделите 10 на 3 нацело (без остатка). Выведите результат.",
+            example: "print(10 // 3)",
+            solution: "print(10 // 3)",
+            hint: "Используйте двойной слэш //."
+        },
+        {
+            id: 8,
+            title: "Остаток от деления",
+            description: "Найдите остаток от деления 10 на 3.",
+            example: "print(10 % 3)",
+            solution: "print(10 % 3)",
+            hint: "Используйте символ процента %."
+        },
+        {
+            id: 9,
+            title: "Списки",
+            description: "Создайте список fruits, содержащий 'яблоко', 'банан', 'груша'. Выведите второй элемент списка.",
+            example: "fruits = ['яблоко', 'банан', 'груша']\nprint(fruits[1])",
+            solution: "fruits = ['яблоко', 'банан', 'груша']\nprint(fruits[1])",
+            hint: "Индексация в Python начинается с нуля. Второй элемент имеет индекс 1."
+        },
+        {
+            id: 10,
+            title: "Словари",
+            description: "Создайте словарь user с ключами 'name' (значение 'Иван') и 'age' (значение 30). Выведите имя пользователя.",
+            example: "user = {'name': 'Иван', 'age': 30}\nprint(user['name'])",
+            solution: "user = {'name': 'Иван', 'age': 30}\nprint(user['name'])",
+            hint: "К словарю обращаются по ключу в квадратных скобках."
+        },
+        {
+            id: 11,
+            title: "Булевы значения",
+            description: "Создайте переменную is_python_fun и присвойте ей значение True. Выведите её.",
+            example: "is_python_fun = True\nprint(is_python_fun)",
+            solution: "is_python_fun = True\nprint(is_python_fun)",
+            hint: "Логические значения пишутся с большой буквы: True или False."
+        },
+        {
+            id: 12,
+            title: "Преобразование типов",
+            description: "У вас есть строка number_str = '123'. Преобразуйте её в число и прибавьте 10. Выведите результат.",
+            example: "number_str = '123'\nresult = int(number_str) + 10\nprint(result)",
+            solution: "number_str = '123'\nresult = int(number_str) + 10\nprint(result)",
+            hint: "Используйте функцию int() для превращения строки в число."
+        },
+        {
+            id: 13,
+            title: "Длина строки",
+            description: "Выведите длину строки 'Python'.",
+            example: "print(len('Python'))",
+            solution: "print(len('Python'))",
+            hint: "Встроенная функция len() возвращает количество символов."
+        },
+        {
+            id: 14,
+            title: "Конкатенация строк",
+            description: "Есть две переменные: first = 'Добрый' и second = 'вечер'. Соберите из них одну строку 'Добрый вечер'.",
+            example: "first = 'Добрый'\nsecond = 'вечер'\nprint(first + ' ' + second)",
+            solution: "first = 'Добрый'\nsecond = 'вечер'\nprint(first + ' ' + second)",
+            hint: "Не забудьте добавить пробел между словами."
+        },
+        {
+            id: 15,
+            title: "Добавление в список",
+            description: "Создайте пустой список numbers. Добавьте в него числа 1, 2 и 3 с помощью метода append(). Выведите список.",
+            example: "numbers = []\nnumbers.append(1)\nnumbers.append(2)\nnumbers.append(3)\nprint(numbers)",
+            solution: "numbers = []\nnumbers.append(1)\nnumbers.append(2)\nnumbers.append(3)\nprint(numbers)",
+            hint: "Метод append() добавляет элемент в конец списка."
+        },
+        {
+            id: 16,
+            title: "Финальный проект: Калькулятор чека",
+            description: "Напишите программу для магазина. У вас есть список цен items = [150, 200, 50]. Посчитайте общую сумму, прибавьте налог 20% (умножьте сумму на 1.2) и выведите итоговый результат, округленный до целого числа.",
+            example: "items = [150, 200, 50]\ntotal = sum(items)\nfinal = total * 1.2\nprint(round(final))",
+            solution: "items = [150, 200, 50]\ntotal = sum(items)\nfinal = total * 1.2\nprint(round(final))",
+            hint: "Используйте sum() для сложения списка, * 1.2 для налога и round() для округления."
+        }
+    ];
+
+    // --- СОСТОЯНИЕ ---
+    let currentTaskIndex = 0;
+    let solvedTasks = 0;
+
+    // --- ЭЛЕМЕНТЫ UI ---
+    const progressBar = document.getElementById('progressBar');
+    const taskListDiv = document.getElementById('taskList');
+    const taskArea = document.getElementById('taskArea');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // --- ОТРИСОВКА ---
+    function renderTaskList() {
+        taskListDiv.innerHTML = '';
+        tasks.forEach((task, index) => {
+            const btn = document.createElement('button');
+            btn.textContent = `#${task.id}`;
+            btn.className = index === currentTaskIndex ? 'active' : '';
+            btn.onclick = () => goToTask(index);
+            if (task.solved) {
+                btn.style.backgroundColor = 'var(--success)';
+                btn.style.color = '#fff';
+            }
+            taskListDiv.appendChild(btn);
+        });
+    }
+
+    function renderTask() {
+        const task = tasks[currentTaskIndex];
+        taskArea.innerHTML = `
+            <div class="task-header">
+                <h2 class="task-title">Задача ${task.id}: ${task.title}</h2>
+                <p class="task-description">${task.description}</p>
+                ${task.example ? `<div class="example-code"><strong>Пример:</strong><br>${task.example.replace(/\n/g, '<br>')}</div>` : ''}
+            </div>
+            <textarea id="codeInput" placeholder="# Напишите ваш код здесь...">${task.userCode || ''}</textarea>
+            <div class="controls">
+                <button class="btn-check" onclick="checkCode()">Проверить</button>
+                <div id="outputBox" class="output-box"></div>
+            </div>
+            ${task.hint ? `<div class="hint" id="hintBox">💡 Подсказка: ${task.hint}</div>` : ''}
+        `;
+        updateNavigation();
+    }
+
+    function updateNavigation() {
+        prevBtn.disabled = currentTaskIndex === 0;
+        nextBtn.disabled = currentTaskIndex === tasks.length - 1;
+    }
+
+    function updateProgress() {
+        solvedTasks = tasks.filter(t => t.solved).length;
+        const percent = (solvedTasks / tasks.length) * 100;
+        progressBar.style.width = percent + '%';
+    }
+
+    function goToTask(index) {
+        // Сохраняем текущий код перед переключением
+        const currentTextarea = document.getElementById('codeInput');
+        if (currentTextarea) {
+            tasks[currentTaskIndex].userCode = currentTextarea.value;
+        }
+        
+        currentTaskIndex = index;
+        renderTask();
+        renderTaskList();
+    }
+
+    // --- ПРОВЕРКА КОДА ---
+    async function checkCode() {
+        const task = tasks[currentTaskIndex];
+        const codeInput = document.getElementById('codeInput');
+        const outputBox = document.getElementById('outputBox');
+        
+        const userCode = codeInput.value;
+        task.userCode = userCode;
+
+        outputBox.className = 'output-box';
+        outputBox.innerHTML = 'Выполняется...';
+
+        try {
+            // Инициализация Pyodide
+            let pyodide = await loadPyodide({
+                indexURL : "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/"
+            });
+
+            // Перехват вывода print()
+            let stdout = "";
+            pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+            `);
+
+            // Выполнение кода пользователя
+            await pyodide.runPythonAsync(userCode);
+
+            // Получение результата
+            stdout = await pyodide.runPythonAsync("sys.stdout.getvalue()");
+
+            // Проверка решения
+            const expected = task.solution.trim();
+            const userOutput = stdout.trim();
+
+            if (userOutput === expected) {
+                outputBox.className = 'output-box output-success';
+                outputBox.textContent = '✅ Верно!';
+                if (!task.solved) {
+                    task.solved = true;
+                    solvedTasks++;
+                    updateProgress();
+                    renderTaskList();
+                }
+            } else {
+                outputBox.className = 'output-box output-error';
+                outputBox.textContent = '❌ Неверный результат.\n\nВаш вывод:\n' + stdout + '\n\nОжидалось:\n' + expected;
+            }
+
+        } catch (e) {
+            outputBox.className = 'output-box output-error';
+            const errorMsg = e.message.toString();
+            
+            // Парсинг ошибки для подсветки строки (Pyodide часто пишет "line 3")
+            let lineMatch = errorMsg.match(/line (\d+)/);
+            let lineHint = lineMatch ? ` (строка ${lineMatch[1]})` : '';
+
+            outputBox.textContent = '❌ Ошибка в коде!' + lineHint + '\n\n' + errorMsg;
+        }
+    }
+
+    // --- ЗАПУСК ---
+    renderTask();
+    renderTaskList();
+    updateProgress();
+
+    nextBtn.onclick = () => goToTask(currentTaskIndex + 1);
+    prevBtn.onclick = () => goToTask(currentTaskIndex - 1);
+
+    // Сохранение кода при переключении через навигацию
+    window.goToTask = function(index) {
+        const currentTextarea = document.getElementById('codeInput');
+        if (currentTextarea) {
+            tasks[currentTaskIndex].userCode = currentTextarea.value;
+        }
+        goToTask(index);
+    };
+</script>
+<script type="module">
+// Загрузка Pyodide (вынесено отдельно, чтобы не конфликтовать с основным скриптом)
+import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.mjs";
+window.loadPyodide = loadPyodide;
+</script>
+
+</body>
+</html>
