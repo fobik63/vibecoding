@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Навигация по проекту</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #f0f6fc;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        p.subtitle {
+            font-size: 14px;
+            color: #8b949e;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .nav-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #58a6ff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+            transform: translateY(-2px);
+            color: #79c0ff;
+        }
+
+        .nav-item .icon {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .nav-item .title {
+            display: flex;
+            align-items: center;
+        }
+
+        .arrow {
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        .nav-item:hover .arrow {
+            color: #f0f6fc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Vibecoding</h1>
+        <p class="subtitle">Выберите проект для открытия</p>
+
+        <div class="nav-list">
+            <a href="Cursor.html" class="nav-item">
+                <span class="title"><span class="icon">📄</span> Cursor.html</span>
+                <span class="arrow">→</span>
+            </a>
+            <a href="OpenClow.html" class="nav-item">
+                <span class="title"><span class="icon">📄</span> OpenClow.html</span>
+                <span class="arrow">→</span>
+            </a>
+            <a href="Qwen_web_dev.html" class="nav-item">
+                <span class="title"><span class="icon">📄</span> Qwen_web_dev.html</span>
+                <span class="arrow">→</span>
+            </a>
+            <a href="QwenlightGPT.html" class="nav-item">
+                <span class="title"><span class="icon">📄</span> QwenlightGPT.html</span>
+                <span class="arrow">→</span>
+            </a>
+            <a href="gigaGPT.html" class="nav-item">
+                <span class="title"><span class="icon">📄</span> gigaGPT.html</span>
+                <span class="arrow">→</span>
+            </a>
+            <a href="zAl.html" class="nav-item">
+                <span class="title"><span class="icon">📄</span> zAl.html</span>
+                <span class="arrow">→</span>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>
