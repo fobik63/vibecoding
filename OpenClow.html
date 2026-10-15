@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Course</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .lesson {
+            margin-bottom: 20px;
+        }
+        .lesson h2 {
+            color: #333;
+        }
+        .lesson p {
+            line-height: 1.6;
+        }
+        .lesson pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .lesson a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .lesson a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Python Course</h1>
+    <div class="lesson">
+        <h2>Introduction to Python</h2>
+        <p>Python is a versatile programming language known for its simplicity and readability. It is widely used in web development, data analysis, artificial intelligence, and more.</p>
+        <p>Before we dive into the course, make sure you have Python installed on your computer. You can download it from <a href="https://www.python.org/downloads/" target="_blank">python.org</a>.</p>
+    </div>
+    <div class="lesson">
+        <h2>Variables and Data Types</h2>
+        <p>Variables in Python are used to store data. Python has several data types, including integers, floats, strings, and booleans.</p>
+        <pre><code>
+# Example of variable assignment
+x = 5
+y = 3.14
+name = "Alice"
+is_student = True
+
+# Print variables
+print(x)  # Output: 5
+print(y)  # Output: 3.14
+print(name)  # Output: Alice
+print(is_student)  # Output: True
+        </code></pre>
+    </div>
+    <div class="lesson">
+        <h2>Control Structures</h2>
+        <p>Control structures allow you to control the flow of your program. Python supports if-else statements, for loops, and while loops.</p>
+        <pre><code>
+# If-else statement
+age = 18
+if age >= 18:
+    print("You are an adult.")
+else:
+    print("You are a minor.")
+
+# For loop
+for i in range(5):
+    print(i)  # Output: 0 1 2 3 4
+
+# While loop
+count = 0
+while count < 5:
+    print(count)  # Output: 0 1 2 3 4
+    count += 1
+        </code></pre>
+    </div>
+    <div class="lesson">
+        <h2>Functions</h2>
+        <p>Functions are reusable blocks of code that perform a specific task. They help in organizing and reusing code.</p>
+        <pre><code>
+# Define a function
+def greet(name):
+    return "Hello, " + name
+
+# Call the function
+print(greet("Alice"))  # Output: Hello, Alice
+        </code></pre>
+    </div>
+    <div class="lesson">
+        <h2>Modules and Packages</h2>
+        <p>Modules and packages in Python allow you to organize your code into reusable components. You can create your own modules and use built-in modules as well.</p>
+        <pre><code>
+# Importing a module
+import math
+
+# Using a function from the module
+result = math.sqrt(16)
+print(result)  # Output: 4.0
+        </code></pre>
+    </div>
+    <div class="lesson">
+        <h2>File I/O</h2>
+        <p>File I/O operations allow you to read from and write to files in Python. This is useful for handling data persistence and configuration files.</p>
+        <pre><code>
+# Writing to a file
+with open("example.txt", "w") as file:
+    file.write("Hello, Python!")
+
+# Reading from a file
+with open("example.txt", "r") as file:
+    content = file.read()
+    print(content)  # Output: Hello, Python!
+        </code></pre>
+    </div>
+    <div class="lesson">
+        <h2>Exceptions Handling</h2>
+        <p>Exception handling in Python allows you to handle errors gracefully. You can use try-except blocks to catch and handle exceptions.</p>
+        <pre><code>
+try:
+    result = 10 / 0
+except ZeroDivisionError:
+    print("Error: Division by zero is not allowed.")
+finally:
+    print("This will always execute.")
+        </code></pre>
+    </div>
+    <div class="lesson">
+        <h2>Object-Oriented Programming (OOP)</h2>
+        <p>OOP is a programming paradigm that uses objects to represent real-world entities. Python supports OOP concepts such as classes, objects, inheritance, and polymorphism.</p>
+        <pre><code>
+# Define a class
+class Dog:
+    def __init__(self, name):
+        self.name = name
+
+    def bark(self):
+        return self.name + " says woof!"
+
+# Create an object
+my_dog = Dog("Buddy")
+print(my_dog.bark())  # Output: Buddy says woof!
+        </code></pre>
+    </div>
+    <div class="lesson">
+        <h2>Python Libraries and Frameworks</h2>
+        <p>Python has a vast ecosystem of libraries and frameworks that extend its functionality. Some popular ones include NumPy for numerical computations, pandas for data analysis, and Django for web development.</p>
+        <pre><code>
+# Example using NumPy
+import numpy as np
+
+# Create a NumPy array
+arr = np.array([1, 2, 3, 4, 5])
+print(arr)  # Output: [1 2 3 4 5]
+        </code></pre>
+    </div>
+    <div class="lesson">
+        <h2>Python Best Practices</h2>
+        <p>Python has a set of best practices that help you write clean, efficient, and maintainable code. Some of these practices include using meaningful variable names, following PEP 8 guidelines, and writing modular code.</p>
+        <pre><code>
+# Example of PEP 8 compliant code
+def calculate_area(width, height):
+    return width * height
+
+area = calculate_area(5, 3)
+print(area)  # Output: 15
+        </code></pre>
+    </div>
+    <div class="lesson">
+        <h2>Conclusion</h2>
+        <p>This course provides a basic introduction to Python programming. It covers essential topics such as variables, control structures, functions, modules, file I/O, exceptions, OOP, and best practices. To continue learning, you can explore more advanced topics and projects.</p>
+    </div>
+</body>
+</html>
