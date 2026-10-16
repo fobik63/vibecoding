@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Навигация по проекту</title>
+    <title>Vibecoding Hub</title>
     <style>
         * {
             box-sizing: border-box;
@@ -24,23 +24,24 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 550px;
             background-color: #161b22;
             border: 1px solid #30363d;
             border-radius: 12px;
-            padding: 30px;
+            padding: 32px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
         }
 
         h1 {
-            font-size: 24px;
+            font-size: 22px;
             color: #f0f6fc;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-align: center;
+            letter-spacing: -0.5px;
         }
 
         p.subtitle {
-            font-size: 14px;
+            font-size: 13px;
             color: #8b949e;
             text-align: center;
             margin-bottom: 24px;
@@ -49,19 +50,20 @@
         .nav-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 18px;
+            padding: 12px 16px;
             background-color: #21262d;
             border: 1px solid #30363d;
             border-radius: 8px;
             color: #58a6ff;
             text-decoration: none;
+            font-size: 14px;
             font-weight: 500;
             transition: all 0.2s ease;
         }
@@ -69,63 +71,61 @@
         .nav-item:hover {
             background-color: #30363d;
             border-color: #8b949e;
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             color: #79c0ff;
         }
 
         .nav-item .title {
             display: flex;
             align-items: center;
-        }
-
-        .nav-item .icon {
-            margin-right: 12px;
-            font-size: 18px;
+            gap: 10px;
         }
 
         .arrow {
             color: #8b949e;
             font-size: 14px;
+            transition: transform 0.2s ease;
         }
 
         .nav-item:hover .arrow {
             color: #f0f6fc;
+            transform: translateX(3px);
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Vibecoding</h1>
-        <p class="subtitle">Выберите проект для открытия</p>
+        <h1>Vibecoding Workspace</h1>
+        <p class="subtitle">Интерактивные прототипы и наработки</p>
 
         <div class="nav-list">
             <a href="Cursor.html" class="nav-item">
-                <span class="title"><span class="icon">📄</span> Cursor.html</span>
+                <span class="title"><span>📄</span> Cursor</span>
                 <span class="arrow">→</span>
             </a>
             <a href="OpenClow.html" class="nav-item">
-                <span class="title"><span class="icon">📄</span> OpenClow.html</span>
+                <span class="title"><span>🤖</span> OpenClaw</span>
                 <span class="arrow">→</span>
             </a>
             <a href="Qwen_web_dev.html" class="nav-item">
-                <span class="title"><span class="icon">📄</span> Qwen_web_dev.html</span>
+                <span class="title"><span>🌐</span> Qwen Web Dev</span>
                 <span class="arrow">→</span>
             </a>
             <a href="QwenlightGPT.html" class="nav-item">
-                <span class="title"><span class="icon">📄</span> QwenlightGPT.html</span>
+                <span class="title"><span>💡</span> Qwenlight GPT</span>
                 <span class="arrow">→</span>
             </a>
             <a href="gigaGPT.html" class="nav-item">
-                <span class="title"><span class="icon">📄</span> gigaGPT.html</span>
+                <span class="title"><span>⚡</span> GigaGPT</span>
                 <span class="arrow">→</span>
             </a>
             <a href="otchet.html" class="nav-item">
-                <span class="title"><span class="icon">📄</span> otchet.html</span>
+                <span class="title"><span>📊</span> Отчет</span>
                 <span class="arrow">→</span>
             </a>
             <a href="zAl.html" class="nav-item">
-                <span class="title"><span class="icon">📄</span> zAl.html</span>
+                <span class="title"><span>🚀</span> zAI (Запуск)</span>
                 <span class="arrow">→</span>
             </a>
         </div>
